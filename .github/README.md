@@ -1,4 +1,8 @@
 
+## prerequisites
+* Install dust as a replacement for du (or change in .zsh/aliases)
+* Install ripgrep as a replacement for grep (or change in .zsh/aliases)
+
 ## Install Instructions
 * git clone https://github.com/4hmz4/dot
 * Make sure zsh is installed (dont activate it yet)
