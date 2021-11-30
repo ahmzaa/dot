@@ -1,0 +1,65 @@
+#
+# # ex - archive extractor
+# # usage: ex <file>
+ex ()
+{
+  if [ -f $1 ] ; then
+    case $1 in
+      *.tar.bz2)   tar xjf $1   ;;
+      *.tar.gz)    tar xzf $1   ;;
+      *.tar.xz)    tar xJf $1   ;;
+      *.bz2)       bunzip2 $1   ;;
+      *.rar)       unrar x $1     ;;
+      *.gz)        gunzip $1    ;;
+      *.tar)       tar xf $1    ;;
+      *.tbz2)      tar xjf $1   ;;
+      *.tgz)       tar xzf $1   ;;
+      *.zip)       unzip $1     ;;
+      *.Z)         uncompress $1;;
+      *.7z)        7z x $1      ;;
+      *)           echo "'$1' cannot be extracted via ex()" ;;
+    esac
+  else
+    echo "'$1' is not a valid file"
+  fi
+}
+
+export EDITOR=vim
+
+alias ls='ls --color'
+alias ll='ls -l --color'
+alias la='ls -all --color'
+
+alias zshrc='${=EDITOR} ~/.zshrc'
+
+alias grep='rg --pretty'
+
+alias du="dust"
+
+alias rm='rm -i'
+alias cp='cp -i'
+alias mv='mv -i'
+alias vim='vim'
+alias vi='vim'
+
+gitpush() {
+    git add .
+    git commit -m "$*"
+    git pull
+    git push
+}
+gitupdate() {
+    eval "$(ssh-agent -s)"
+    ssh-add ~/.ssh/github
+    ssh -T git@github.com
+}
+alias gp=gitpush
+alias gu=gitupdate
+
+alias dc="docker-compose"
+
+# resolve mouse problems after resume
+alias mousefix="sudo modprobe -r psmouse && sudo modprobe psmouse"
+
+# git bare repo aliases for dotfiles
+alias dotconf='/usr/bin/git --git-dir=$HOME/dot --work-tree=$HOME'
