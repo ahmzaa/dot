@@ -31,8 +31,6 @@ zstyle ':completion:*' group-name ''
 zstyle ':completion:::::' completer _expand _complete _ignored _approximate
 
 ## THEME
-#autoload -U promptinit; promptinit
-#prompt spaceship
 
 SPACESHIP_PROMPT_ORDER=(
   user          # Username section
