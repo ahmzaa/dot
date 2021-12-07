@@ -38,7 +38,6 @@ alias grep='rg --pretty'
 
 alias du="dust"
 
-alias rm='rm -i'
 alias cp='cp -i'
 alias mv='mv -i'
 alias vim='nvim'
