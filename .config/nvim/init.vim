@@ -33,6 +33,8 @@ set redrawtime=10000 " More time to load syntax larger files
 
 let mapleader = "\<space>"
 
+cmap w!! w !sudo tee > /dev/null %
+
 nmap <leader>ve :edit ~/.config/nvim/init.vim<cr>
 nmap <leader>vr :source ~/.config/nvim/init.vim<cr>
 
