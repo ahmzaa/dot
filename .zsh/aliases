@@ -1,47 +1,53 @@
-#
-# # ex - archive extractor
-# # usage: ex <file>
-ex ()
-{
-  if [ -f $1 ] ; then
-    case $1 in
-      *.tar.bz2)   tar xjf $1   ;;
-      *.tar.gz)    tar xzf $1   ;;
-      *.tar.xz)    tar xJf $1   ;;
-      *.bz2)       bunzip2 $1   ;;
-      *.rar)       unrar x $1     ;;
-      *.gz)        gunzip $1    ;;
-      *.tar)       tar xf $1    ;;
-      *.tbz2)      tar xjf $1   ;;
-      *.tgz)       tar xzf $1   ;;
-      *.zip)       unzip $1     ;;
-      *.Z)         uncompress $1;;
-      *.7z)        7z x $1      ;;
-      *)           echo "'$1' cannot be extracted via ex()" ;;
-    esac
-  else
-    echo "'$1' is not a valid file"
-  fi
-}
+# AHMZA's aliases
 
-alias sudo='sudo '
+#                                                    
+#                                                    
+#                                                    
+#              :FffffF`       |fffff|                
+#           .~Q@@@@@@@Qe    ?Q@@@@@@@Qz~             
+#           S@@@@@@@@@@O    /@@@@@@@@@@@             
+#           S@@@@@@@@Q;,'}N',~$Q@@@@@@@@             
+#           S@@@@@@Zr  ;@@@@S  `ZM@@@@@@             
+#           ';@@@l:    ;@j;@f     ;Q@@j;             
+#              'rr/@@@/rr' rrr#@@Orr:                
+#             6#@@@@@@@@@#6@@@@@@@@@Q6;              
+#      /@/rrO@@@@@@@@@@@@#6@@@@@@@@@@@@@rrr#Q        
+#      ,\Q@@@@@@@@@@@@@B\, \k@@@@@@@@@@@@@@Sr        
+#        ```cDDDDDDDc```     ``,HDDDDDDD```          
+#              :FFl              :ff|                
+#              /@@Q~.           ~u@@O                
+#              /@@@@Mv`       ru@@@@O                
+#              `~$Q@@@BNNNNNNN@@@@Q;'                
+#                 `ZM@@@@@@@@@@@Zr                   
+#                   .;;;;;;;;;;:                     
+#                                                    
+#                                                    
+
+#----------------------------------------------------------------------
+# General
+#----------------------------------------------------------------------
 
 export EDITOR=nvim
+alias zshrc='${=EDITOR} ~/.zshrc'
+alias vim='nvim'
+alias vi='nvim'
+
+alias sudo='sudo '
 
 alias ls='ls --color'
 alias ll='ls -l --color'
 alias la='ls -all --color'
 
-alias zshrc='${=EDITOR} ~/.zshrc'
-
 alias grep='rg --pretty'
-
 alias du="dust"
 
 alias cp='cp -i'
 alias mv='mv -i'
-alias vim='nvim'
-alias vi='nvim'
+
+
+#----------------------------------------------------------------------
+# Git
+#----------------------------------------------------------------------
 
 gitpush() {
     git add .
@@ -57,13 +63,22 @@ gitupdate() {
 alias gp=gitpush
 alias gu=gitupdate
 
-alias dc="docker-compose"
-
-# resolve mouse problems after resume
-alias mousefix="sudo modprobe -r psmouse && sudo modprobe psmouse"
-
 # git bare repo aliases for dotfiles
 alias dotconf='/usr/bin/git --git-dir=$HOME/dot --work-tree=$HOME'
 
+
+#----------------------------------------------------------------------
+# Docker
+#----------------------------------------------------------------------
+
+alias dc="docker-compose"
+
+
+#----------------------------------------------------------------------
+# Misc
+#----------------------------------------------------------------------
+
+# resolve mouse problems after resume
+alias mousefix="sudo modprobe -r psmouse && sudo modprobe psmouse"
 # dslr loopback
 alias dslr-webcam='gphoto2 --stdout --capture-movie | ffmpeg -hwaccel nvdec -c:v mjpeg_cuvid -i - -vcodec rawvideo -pix_fmt yuv420p -threads 0 -f v4l2 /dev/video10'

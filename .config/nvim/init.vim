@@ -4,12 +4,14 @@
 " General Settings
 "-----------------------------------------------------------------
 
+set expandtab
 set shiftwidth=4
 set tabstop=4
 set hidden
 set signcolumn=yes:2
 set relativenumber
 set number
+"set termguicolors
 set undofile
 set spell
 set spelllang=en_gb
@@ -33,7 +35,7 @@ set redrawtime=10000 " More time to load syntax larger files
 
 let mapleader = "\<space>"
 
-cmap w!! w !sudo tee > /dev/null %
+cmap w!! %!sudo tee > /dev/null %
 
 nmap <leader>ve :edit ~/.config/nvim/init.vim<cr>
 nmap <leader>vr :source ~/.config/nvim/init.vim<cr>
@@ -43,6 +45,14 @@ nmap <silent> <leader>l :bnext<cr>
 
 nmap <leader>Q :bufdo bdelete<cr>
 nmap <leader>q :bd<cr>
+
+" http://ddrscott.github.io/blog/2016/yank-without-jank/
+vnoremap y myy`y
+vnoremap Y myY`y
+
+" When text is wrapped, move by terminal rows, not lines, unless a count is provided
+noremap <silent> <expr> j (v:count == 0 ? 'gj' : 'j')
+noremap <silent> <expr> k (v:count == 0 ? 'gk' : 'k')
 
 map gf :edit <cfile><cr>
 
