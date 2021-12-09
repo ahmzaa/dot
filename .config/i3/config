@@ -81,7 +81,7 @@ exec --no-startup-id betterlockscreen -w
 
 exec --no-startup-id xautolock -time 3 -locker "betterlockscreen -l dim"
 
-exec --no-startup-id picom
+exec --no-startup-id picom --experimental-backend
 
 exec --no-startup-id nm-applet
 
