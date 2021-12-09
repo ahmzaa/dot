@@ -1,18 +1,55 @@
-## GENERAL
+# AHMZA's ZSHRC configuration
+
+#                                                    
+#                                                    
+#                                                    
+#              :FffffF`       |fffff|                
+#           .~Q@@@@@@@Qe    ?Q@@@@@@@Qz~             
+#           S@@@@@@@@@@O    /@@@@@@@@@@@             
+#           S@@@@@@@@Q;,'}N',~$Q@@@@@@@@             
+#           S@@@@@@Zr  ;@@@@S  `ZM@@@@@@             
+#           ';@@@l:    ;@j;@f     ;Q@@j;             
+#              'rr/@@@/rr' rrr#@@Orr:                
+#             6#@@@@@@@@@#6@@@@@@@@@Q6;              
+#      /@/rrO@@@@@@@@@@@@#6@@@@@@@@@@@@@rrr#Q        
+#      ,\Q@@@@@@@@@@@@@B\, \k@@@@@@@@@@@@@@Sr        
+#        ```cDDDDDDDc```     ``,HDDDDDDD```          
+#              :FFl              :ff|                
+#              /@@Q~.           ~u@@O                
+#              /@@@@Mv`       ru@@@@O                
+#              `~$Q@@@BNNNNNNN@@@@Q;'                
+#                 `ZM@@@@@@@@@@@Zr                   
+#                   .;;;;;;;;;;:                     
+#                                                    
+#                                                    
+
+
+#----------------------------------------------------------------------
+# General
+#----------------------------------------------------------------------
 setopt autocd extendedglob nomatch
 unsetopt beep notify
 bindkey -v
 
-## HISTORY
-HISTFILE=$HOME/.zsh_history
-HISTSIZE=1000
-SAVEHIST=1000
-setopt hist_ignore_all_dups
-setopt hist_reduce_blanks
-setopt inc_append_history
-setopt share_history
+# ALIAS
+[ -f "$HOME/.zsh/aliases" ] && source "$HOME/.zsh/aliases"
 
-## AUTOCOMPLETE
+# AUTOJUMP
+[[ -s /home/ahmza/.autojump/etc/profile.d/autojump.sh ]] && source /home/ahmza/.autojump/etc/profile.d/autojump.sh
+
+# PATH EXPORTS
+export PATH="/home/ahmza/bin:$PATH"
+export PATH="/home/ahmza/.local/bin:$PATH"
+
+# ANTIGEN PLUGINS
+# Load plugin changes by running
+# antibody bundle < ~/.zsh_plugins > ~/.zsh_plugins.sh
+source ~/.zsh_plugins.sh
+
+
+#----------------------------------------------------------------------
+# Auto Complete
+#----------------------------------------------------------------------
 autoload -Uz compinit
 typeset -i updated_at=$(date +'%j' -r ~/.zcompdump 2>/dev/null || stat -f '%Sm' -t '%j' ~/.zcompdump 2>/dev/null)
 if [ $(date +'%j') != $updated_at ]; then
@@ -30,7 +67,10 @@ zstyle ':completion:*' menu select
 zstyle ':completion:*' group-name ''
 zstyle ':completion:::::' completer _expand _complete _ignored _approximate
 
-## THEME
+
+#----------------------------------------------------------------------
+# Theme
+#----------------------------------------------------------------------
 
 SPACESHIP_PROMPT_ORDER=(
   user          # Username section
@@ -49,21 +89,19 @@ SPACESHIP_PROMPT_ADD_NEWLINE=false
 # SPACESHIP_CHAR_SYMBOL="❯"
 SPACESHIP_CHAR_SUFFIX=" "
 
-## ALIAS
-[ -f "$HOME/.zsh/aliases" ] && source "$HOME/.zsh/aliases"
+#----------------------------------------------------------------------
+# History
+#----------------------------------------------------------------------
 
-## AUTOJUMP
-[[ -s /home/ahmza/.autojump/etc/profile.d/autojump.sh ]] && source /home/ahmza/.autojump/etc/profile.d/autojump.sh
+# HISTORY
+HISTFILE=$HOME/.zsh_history
+HISTSIZE=1000
+SAVEHIST=1000
+setopt hist_ignore_all_dups
+setopt hist_reduce_blanks
+setopt inc_append_history
+setopt share_history
 
-## PATH EXPORTS
-export PATH="/home/ahmza/bin:$PATH"
-export PATH="/home/ahmza/.local/bin:$PATH"
-
-## ANTIGEN PLUGINS
-# Load plugin changes by running
-# antibody bundle < ~/.zsh_plugins > ~/.zsh_plugins.sh
-source ~/.zsh_plugins.sh
-
-## HIST SUBSTR SEARCH
+# HIST SUBSTR SEARCH
 bindkey '^[[A' history-substring-search-up
 bindkey '^[[B' history-substring-search-down
