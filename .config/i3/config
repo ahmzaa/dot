@@ -32,7 +32,7 @@ font pango:JetBrains Mono 10
 
 bar {
 	font pango:JetBrains Mono, Font Awesome 5 Free 11
-	status_command i3blocks
+	status_command i3blocks -c $HOME/.config/i3/blocks
 	position top
 }
 
