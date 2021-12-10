@@ -35,7 +35,7 @@ set hidden
 set signcolumn=yes:2
 set relativenumber
 set number
-"set termguicolors
+set termguicolors
 set undofile
 set spell
 set spelllang=en_gb
@@ -94,6 +94,8 @@ endif
 
 call plug#begin(data_dir . '/plugins')
 
+source ~/.config/nvim/plugins/goyo.vim
+source ~/.config/nvim/plugins/limelight.vim
 source ~/.config/nvim/plugins/airline.vim
 source ~/.config/nvim/plugins/dracula.vim
 source ~/.config/nvim/plugins/floaterm.vim
@@ -105,3 +107,8 @@ source ~/.config/nvim/plugins/polyglot.vim
 "source ~/.config/nvim/plugins/vim-test.vim
 
 call plug#end()
+doautocmd User PlugLoaded
+
+"--------------------------------------------------------------------------
+" Miscellaneous
+"--------------------------------------------------------------------------
