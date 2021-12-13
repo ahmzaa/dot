@@ -28,31 +28,42 @@
 " General Settings
 "-----------------------------------------------------------------
 
+set noswapfile
+set nobackup
+set undodir=~/.vim/undodir
+set undofile
+
+set smartindent
 set expandtab
 set shiftwidth=4
 set tabstop=4
+set softtabstop=4
+
+set spell
+set spelllang=en_gb
+
+set ignorecase
+set smartcase
+set incsearch
+
+set colorcolumn=72
+set signcolumn=yes
+
+set exrc
+set guicursor=
+set nohlsearch
+set noerrorbells
 set hidden
-set signcolumn=yes:2
 set relativenumber
 set number
 set termguicolors
 set undofile
-set spell
-set spelllang=en_gb
-set ignorecase
-set smartcase
 set nowrap
 set list
 set listchars=tab:▸\ ,trail:•
 set scrolloff=8
 set sidescrolloff=8
-set splitright
 set clipboard=unnamedplus
-set confirm
-set backup
-set backupdir=$HOME/.local/share/nvim/backup//
-set updatetime=300 " Reduce time for highlighting other refs
-set redrawtime=10000 " More time to load syntax larger files
 "-----------------------------------------------------------------
 " Key maps
 "-----------------------------------------------------------------
@@ -66,6 +77,11 @@ nmap <leader>vr :source ~/.config/nvim/init.vim<cr>
 
 nmap <silent> <leader>h :bprevious<cr>
 nmap <silent> <leader>l :bnext<cr>
+
+nmap <C-j> <C-W>j
+nmap <C-k> <C-W>k
+nmap <C-h> <C-W>h
+nmap <C-l> <C-W>l
 
 nmap <leader>Q :bufdo bdelete<cr>
 nmap <leader>q :bd<cr>
@@ -101,6 +117,8 @@ source ~/.config/nvim/plugins/dracula.vim
 source ~/.config/nvim/plugins/floaterm.vim
 source ~/.config/nvim/plugins/nerdtree.vim
 source ~/.config/nvim/plugins/telescope.vim
+source ~/.config/nvim/plugins/undotree.vim
+source ~/.config/nvim/plugins/vim-fugitive.vim
 
 source ~/.config/nvim/plugins/polyglot.vim
 "source ~/.config/nvim/plugins/coc.vim

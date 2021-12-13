@@ -50,18 +50,14 @@ alias mv='mv -i'
 #----------------------------------------------------------------------
 
 gitpush() {
-    git add .
-    git commit -m "$*"
     git pull
     git push
 }
-gitupdate() {
-    eval "$(ssh-agent -s)"
-    ssh-add ~/.ssh/github
-    ssh -T git@github.com
-}
+
+alias ga=git add
 alias gp=gitpush
-alias gu=gitupdate
+alias gs=git status
+alias gc=git commit
 
 # git bare repo aliases for dotfiles
 alias dotconf='/usr/bin/git --git-dir=$HOME/dot --work-tree=$HOME'
@@ -81,4 +77,4 @@ alias dc="docker-compose"
 # resolve mouse problems after resume
 alias mousefix="sudo modprobe -r psmouse && sudo modprobe psmouse"
 # dslr loopback
-alias dslr-webcam='gphoto2 --stdout --capture-movie | ffmpeg -hwaccel nvdec -c:v mjpeg_cuvid -i - -vcodec rawvideo -pix_fmt yuv420p -threads 0 -f v4l2 /dev/video10'
+alias dslr-webcam='gphoto2 --set-config /main/actions/manualfocusdrive=1 --set-config /main/imgsettings/whitebalance=0 --set-config /main/capturesettings/aperture=0 --stdout --capture-movie | ffmpeg -hwaccel nvdec -c:v mjpeg_cuvid -i - -vcodec rawvideo -pix_fmt yuv420p -threads 0 -f v4l2 /dev/video10'
