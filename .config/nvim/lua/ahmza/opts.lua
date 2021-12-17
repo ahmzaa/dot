@@ -1,6 +1,6 @@
 vim.opt.swapfile = false
 vim.opt.backup = false
-vim.opt.undodir = "~/.vim/undodir"
+vim.opt.undodir = "/home/ahmza/.vim/undodir"
 vim.opt.undofile = true
 
 vim.opt.smartindent = true
@@ -33,5 +33,9 @@ vim.opt.listchars = { space = '•', tab = '>~' }
 vim.opt.scrolloff = 8
 vim.opt.sidescrolloff = 8
 vim.opt.clipboard = "unnamedplus"
+
+vim.cmd([[hi DraculaBoundry NONE]])
+vim.cmd([[hi DraculaDiffDelete NONE]])
+vim.cmd([[hi DraculaComment cterm=italic gui=italic]])
 
 vim.g.goyo_width = 120

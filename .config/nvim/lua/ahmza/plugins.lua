@@ -9,7 +9,7 @@ endif
 call plug#begin(data_dir . '/plugins')
 
 source ~/.config/nvim/plugins/airline.vim
-source ~/.config/nvim/plugins/dracula.vim
+"source ~/.config/nvim/plugins/dracula.vim
 source ~/.config/nvim/plugins/floaterm.vim
 source ~/.config/nvim/plugins/undotree.vim
 
@@ -19,7 +19,6 @@ source ~/.config/nvim/plugins/undotree.vim
 "source ~/.config/nvim/plugins/vim-test.vim
 
 call plug#end()
-doautocmd User PlugLoaded
 
 ]])
 
@@ -28,6 +27,14 @@ vim.cmd('packadd packer.nvim')
 require('packer').startup(function()
     use 'wbthomason/packer.nvim'
     use 'tpope/vim-fugitive'
+    use 'arcticicestudio/nord-vim'
+    use 'dracula/vim'
+--    use 'tribela/vim-transparent'
+    
+--    use {
+--            'dracula/vim',
+--            config = function() require 'ahmza.dracula' end,
+--        }
 
     use {
             'preservim/nerdtree',
@@ -57,7 +64,5 @@ require('packer').startup(function()
             'junegunn/limelight.vim',
             config = function() require 'ahmza.limelight' end,
         }
-
-
 
 end)

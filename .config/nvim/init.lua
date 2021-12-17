@@ -26,7 +26,8 @@
 
 require('ahmza.plugins')
 
---vim.cmd('colo dracula')
+--vim.api.nvim_command([[doautocmd User PlugLoaded]])
+vim.cmd('colorscheme dracula')
 
 
 -----------------------------------------------------------------------
