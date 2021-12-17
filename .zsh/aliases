@@ -54,10 +54,10 @@ gitpush() {
     git push
 }
 
-alias ga=git add
+alias ga="git add"
 alias gp=gitpush
-alias gs=git status
-alias gc=git commit
+alias gs="git status"
+alias gc="git commit"
 
 # git bare repo aliases for dotfiles
 alias dotconf='/usr/bin/git --git-dir=$HOME/dot --work-tree=$HOME'
