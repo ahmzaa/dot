@@ -74,6 +74,8 @@ alias dc="docker-compose"
 # Misc
 #----------------------------------------------------------------------
 
+alias cat="bat"
+
 # resolve mouse problems after resume
 alias mousefix="sudo modprobe -r psmouse && sudo modprobe psmouse"
 # dslr loopback
