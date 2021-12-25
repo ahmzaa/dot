@@ -31,9 +31,13 @@ set $mod Mod4
 font pango:JetBrains Mono 10
 
 bar {
-	font pango:JetBrains Mono, Font Awesome 5 Free 11
-	status_command i3blocks -c $HOME/.config/i3/blocks
-	position top
+    tray_output primary
+    output primary
+    output DP-2
+
+    font pango:JetBrains Mono, Font Awesome 5 Free 11
+    status_command i3blocks -c $HOME/.config/i3/blocks
+    position top
 }
 
 default_border pixel 0
@@ -51,6 +55,8 @@ bindsym $mod+Shift+q kill
 
 bindsym $mod+Return exec i3-sensible-terminal
 
+bindsym $mod+Control+r exec i3-sensible-terminal --command ranger
+
 bindsym $mod+shift+x exec betterlockscreen -l dim
 
 bindsym $mod+d exec --no-startup-id rofi -show drun
@@ -59,6 +65,7 @@ bindsym $mod+period exec --no-startup-id rofimoji
 bindsym $mod+Shift+c reload
 bindsym $mod+Shift+r restart
 bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -B 'Yes, exit i3' 'i3-msg exit'"
+
 # Use pactl to adjust volume in PulseAudio.
 set $refresh_i3status killall -SIGUSR1 i3status
 bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +10% && $refresh_i3status
@@ -173,6 +180,22 @@ bindsym $mod+Shift+7 move container to workspace number $ws7
 bindsym $mod+Shift+8 move container to workspace number $ws8
 bindsym $mod+Shift+9 move container to workspace number $ws9
 bindsym $mod+Shift+0 move container to workspace number $ws10
+
+
+## Multi monitor Specific settings
+
+# move workspaces between monitors
+bindsym $mod+Control+h move workspace to output left
+bindsym $mod+Control+j move workspace to output down
+bindsym $mod+Control+k move workspace to output up
+bindsym $mod+Control+l move workspace to output right
+
+# move containers between monitors
+bindsym $mod+Shift+Control+h move container to output left
+bindsym $mod+Shift+Control+j move container to output down
+bindsym $mod+Shift+Control+k move container to output up
+bindsym $mod+Shift+Control+l move container to output right
+
 
 #----------------------------------------------------------------------
 # Misc
