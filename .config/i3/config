@@ -83,7 +83,7 @@ exec --no-startup-id dex --autostart --environment i3
 # Set Wallpaper
 exec --no-startup-id betterlockscreen -w
 
-exec --no-startup-id xautolock -time 3 -locker "betterlockscreen -l dim"
+exec --no-startup-id xss-lock -- betterlockscreen -l dim
 
 exec --no-startup-id picom --experimental-backend
 
