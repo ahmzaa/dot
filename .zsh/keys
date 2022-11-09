@@ -1,0 +1,24 @@
+#----------------------------------------------------------------------
+# ENV Vars
+#----------------------------------------------------------------------
+
+export PYENV_ROOT="$HOME/.pyenv"
+
+export GITLAB_PAT=""
+export POWERSERVICE_PASS=""
+export OAUTH_BROKER_TOKEN=""
+
+# Kontron Credentials
+export KONTRON_USERNAME="admin"
+export KONTRON_PASSWORD=""
+export KONTRONAPI_PASS=""
+export KONTRONIPMI_PASS=""
+export KONTRON_IPMI_USER="admin"
+export KONTRON_HUBNODE_IPMI_PASS="admin"
+export KONTRON_BUILDSHEET_API_KEY=""
+export KONTRON_BUILDSHEET_API_KEY_STAGING=""
+
+# IPMI Credentials
+export IPMI_USERNAME="ADMIN"
+export IPMI_PASSWORD=""
+export IPMI_PASS=""
