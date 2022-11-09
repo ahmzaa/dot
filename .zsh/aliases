@@ -38,8 +38,7 @@ alias ls='ls --color'
 alias ll='ls -l --color'
 alias la='ls -all --color'
 
-alias grep='rg --pretty'
-alias du="dust"
+alias grep='grep --color'
 
 alias cp='cp -i'
 alias mv='mv -i'
@@ -68,15 +67,57 @@ alias dotconf='/usr/bin/git --git-dir=$HOME/dot --work-tree=$HOME'
 #----------------------------------------------------------------------
 
 alias dc="docker-compose"
+alias dcu="docker-compose up -d"
+alias dcd="docker-compose down"
 
+
+#----------------------------------------------------------------------
+# remote access
+#----------------------------------------------------------------------
+
+# NetJump
+#alias nj='ssh -t netjump-65ed02.hkg06.justin.tv sshpass -p $RADIUS ssh -o "sStrictHostChecking no" $1;'
+alias nj='ssh netjump-65ed02.hkg06.justin.tv'
+
+# Toolbox
+alias tbox="ssh lhr05.tools.live-video.a2z.com"
+
+# Toolbox Proxy
+alias tbox-proxy="ssh -D 9595 lhr05.tools.live-video.a2z.com"
+
+# Bastion Proxy
+alias tproxy="baastion-init.sh"
+
+
+#----------------------------------------------------------------------
+# Draining
+#----------------------------------------------------------------------
+
+drainstatus() {
+    mwcurl -s https://us-west-2.prod.overlord.video.xarth.tv/twirp/code.justin.tv.vidops.shimmy_v1.api.shimmy.v1.Shimmy/GetDrained -H'Content-Type: application/json' --da
+}
+
+drain() {
+    mwcurl -s https://us-west-2.prod.overlord.video.xarth.tv/twirp/code.justin.tv.vidops.shimmy_v1.api.shimmy.v1.Shimmy/DisableSystem -H'Content-Type: application/json' -
+}
+
+undrain() {
+    mwcurl -s https://us-west-2.prod.overlord.video.xarth.tv/twirp/code.justin.tv.vidops.shimmy_v1.api.shimmy.v1.Shimmy/EnableSystem -H'Content-Type: application/json' --
+}
+
+
+shimmy-health() {
+    mwcurl -s https://us-west-2.prod.overlord.video.xarth.tv/twirp/code.justin.tv.vidops.shimmy_v1.api.shimmy.v1.Shimmy/GetHealth -H'Content-Type: application/json' --dat
+}
 
 #----------------------------------------------------------------------
 # Misc
 #----------------------------------------------------------------------
 
-alias cat="bat"
+locat() {
+    tp proxy mcurl -s https://locat.prod.us-west-2.netdev.live-video.a2z.com/ip/$1 | jq
+}
 
-# resolve mouse problems after resume
-alias mousefix="sudo modprobe -r psmouse && sudo modprobe psmouse"
-# dslr loopback
-alias dslr-webcam='gphoto2 --set-config /main/actions/manualfocusdrive=1 --set-config /main/imgsettings/whitebalance=0 --set-config /main/capturesettings/aperture=0 --stdout --capture-movie | ffmpeg -hwaccel nvdec -c:v mjpeg_cuvid -i - -vcodec rawvideo -pix_fmt yuv420p -threads 0 -f v4l2 /dev/video10'
+alias agnios="tp proxy agnios.py"
+alias provision-info="tp proxy provision-info all-devices"
+alias powercontrol.sh="tp proxy powercontrol.sh"

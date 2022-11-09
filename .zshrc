@@ -31,20 +31,27 @@ setopt autocd extendedglob nomatch
 unsetopt beep notify
 bindkey -v
 
-# ALIAS
-[ -f "$HOME/.zsh/aliases" ] && source "$HOME/.zsh/aliases"
+source "$HOME/.zsh/aliases"
+source "$HOME/.zsh/keys"
+
+source "$HOME/src/ipmi_functions/ipmi_functions.sh"
+source "$HOME/bin/mwcurl.sh"
 
 # AUTOJUMP
-[[ -s /home/ahmza/.autojump/etc/profile.d/autojump.sh ]] && source /home/ahmza/.autojump/etc/profile.d/autojump.sh
+source "/usr/local/etc/profile.d/autojump.sh"
 
 # PATH EXPORTS
-export PATH="/home/ahmza/bin:$PATH"
-export PATH="/home/ahmza/.local/bin:$PATH"
+export PATH="$HOME/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
+export PATH="$HOME/.toolbox/bin:$PATH"
+export PATH="$HOME/virtualenv/bin:$PATH"
 
 # ANTIGEN PLUGINS
 # Load plugin changes by running
 # antibody bundle < ~/.zsh_plugins > ~/.zsh_plugins.sh
 source ~/.zsh_plugins.sh
+
+test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
 
 
 #----------------------------------------------------------------------
@@ -105,3 +112,54 @@ setopt share_history
 # HIST SUBSTR SEARCH
 bindkey '^[[A' history-substring-search-up
 bindkey '^[[B' history-substring-search-down
+
+#----------------------------------------------------------------------
+# Pyenv
+#----------------------------------------------------------------------
+
+command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init -)"
+
+
+#----------------------------------------------------------------------
+# PDSH
+#----------------------------------------------------------------------
+
+# This is needed for PPDSH to work from the video-tools hosts without updating the setting globally on the host
+export PDSH_RCMD_TYPE=ssh
+# Puppet PDSH
+puppet_pdsh_proxy() {
+    export PDSH_SSH_ARGS_APPEND="-q -o StrictHostKeyChecking=no"
+    pdsh -t 5 -f 20 -w - ". /etc/profile.d/proxy.sh 2>/dev/null; $@"
+}
+alias ppdsh="puppet_pdsh_proxy"
+
+#----------------------------------------------------------------------
+# SSH Agent
+#----------------------------------------------------------------------
+
+##### START Fix for ssh-agent #####
+# Ref: http://mah.everybody.org/docs/ssh
+-
+SSH_ENV="$HOME/.ssh/environment"
+-
+function start_agent {
+    echo "Initialising new SSH agent..."
+    /usr/bin/ssh-agent | sed 's/^echo/#echo/' > "${SSH_ENV}"
+    echo succeeded
+    chmod 600 "${SSH_ENV}"
+    . "${SSH_ENV}" > /dev/null
+    /usr/bin/ssh-add;
+}
+-
+# Source SSH settings, if applicable
+if [ -f "${SSH_ENV}" ]; then
+    . "${SSH_ENV}" > /dev/null
+    #ps ${SSH_AGENT_PID} doesn't work under cywgin
+    ps -ef | grep ${SSH_AGENT_PID} | grep ssh-agent$ > /dev/null || {
+        start_agent;
+    }
+else
+    start_agent;
+fi
+##### END Fix for ssh-agent #####
