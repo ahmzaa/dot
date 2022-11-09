@@ -11,6 +11,8 @@ These are the minimum required dot files (in my opinion) to get a good looking s
 * Make sure zsh is installed
 * Copy downloaded Files/Folders to corresponding locations on local device
 * Install: https://github.com/wting/autojump
+* Install: https://github.com/wbthomason/packer.nvim
+* Install: https://github.com/junegunn/vim-plug
 * Install: https://getantibody.github.io/install/
 * run: `antibody bundle < ~/.zsh_plugins > ~/.zsh_plugins.sh`
 * activate zsh: `chsh -s $(which zsh)`
