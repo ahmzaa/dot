@@ -72,52 +72,5 @@ alias dcd="docker-compose down"
 
 
 #----------------------------------------------------------------------
-# remote access
-#----------------------------------------------------------------------
-
-# NetJump
-#alias nj='ssh -t netjump-65ed02.hkg06.justin.tv sshpass -p $RADIUS ssh -o "sStrictHostChecking no" $1;'
-alias nj='ssh netjump-65ed02.hkg06.justin.tv'
-
-# Toolbox
-alias tbox="ssh lhr05.tools.live-video.a2z.com"
-
-# Toolbox Proxy
-alias tbox-proxy="ssh -D 9595 lhr05.tools.live-video.a2z.com"
-
-# Bastion Proxy
-alias tproxy="baastion-init.sh"
-
-
-#----------------------------------------------------------------------
-# Draining
-#----------------------------------------------------------------------
-
-drainstatus() {
-    mwcurl -s https://us-west-2.prod.overlord.video.xarth.tv/twirp/code.justin.tv.vidops.shimmy_v1.api.shimmy.v1.Shimmy/GetDrained -H'Content-Type: application/json' --da
-}
-
-drain() {
-    mwcurl -s https://us-west-2.prod.overlord.video.xarth.tv/twirp/code.justin.tv.vidops.shimmy_v1.api.shimmy.v1.Shimmy/DisableSystem -H'Content-Type: application/json' -
-}
-
-undrain() {
-    mwcurl -s https://us-west-2.prod.overlord.video.xarth.tv/twirp/code.justin.tv.vidops.shimmy_v1.api.shimmy.v1.Shimmy/EnableSystem -H'Content-Type: application/json' --
-}
-
-
-shimmy-health() {
-    mwcurl -s https://us-west-2.prod.overlord.video.xarth.tv/twirp/code.justin.tv.vidops.shimmy_v1.api.shimmy.v1.Shimmy/GetHealth -H'Content-Type: application/json' --dat
-}
-
-#----------------------------------------------------------------------
 # Misc
 #----------------------------------------------------------------------
-
-locat() {
-    tp proxy mcurl -s https://locat.prod.us-west-2.netdev.live-video.a2z.com/ip/$1 | jq
-}
-
-alias agnios="tp proxy agnios.py"
-alias provision-info="tp proxy provision-info all-devices"
-alias powercontrol.sh="tp proxy powercontrol.sh"

@@ -32,26 +32,17 @@ unsetopt beep notify
 bindkey -v
 
 source "$HOME/.zsh/aliases"
-source "$HOME/.zsh/keys"
-
-source "$HOME/src/ipmi_functions/ipmi_functions.sh"
-source "$HOME/bin/mwcurl.sh"
 
 # AUTOJUMP
 source "/usr/local/etc/profile.d/autojump.sh"
 
 # PATH EXPORTS
 export PATH="$HOME/bin:$PATH"
-export PATH="$HOME/.local/bin:$PATH"
-export PATH="$HOME/.toolbox/bin:$PATH"
-export PATH="$HOME/virtualenv/bin:$PATH"
 
 # ANTIGEN PLUGINS
 # Load plugin changes by running
 # antibody bundle < ~/.zsh_plugins > ~/.zsh_plugins.sh
 source ~/.zsh_plugins.sh
-
-test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
 
 
 #----------------------------------------------------------------------
@@ -113,26 +104,6 @@ setopt share_history
 bindkey '^[[A' history-substring-search-up
 bindkey '^[[B' history-substring-search-down
 
-#----------------------------------------------------------------------
-# Pyenv
-#----------------------------------------------------------------------
-
-command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
-eval "$(pyenv init -)"
-
-
-#----------------------------------------------------------------------
-# PDSH
-#----------------------------------------------------------------------
-
-# This is needed for PPDSH to work from the video-tools hosts without updating the setting globally on the host
-export PDSH_RCMD_TYPE=ssh
-# Puppet PDSH
-puppet_pdsh_proxy() {
-    export PDSH_SSH_ARGS_APPEND="-q -o StrictHostKeyChecking=no"
-    pdsh -t 5 -f 20 -w - ". /etc/profile.d/proxy.sh 2>/dev/null; $@"
-}
-alias ppdsh="puppet_pdsh_proxy"
 
 #----------------------------------------------------------------------
 # SSH Agent
