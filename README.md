@@ -9,23 +9,20 @@ These are the minimum required dot files (in my opinion) to get a good looking s
 ### What
 dotInstall will download a basic zsh terminal setup.
 It includes configs for
-- zsh
+- alacritty
+- fontconfig
+- i3
 - nvim
-
-features:
+- picom
+- ranger
+- rofi
+- betterlockscreen
 - zsh
-  - antibody
-  - ...
-- nvim
-  - lua config
-  - plugins
-
-... Continue to flesh out this part of the readme
 
 ## Install Instructions
 ### Automatic with dotInstall
 * Run `git clone https://gitlab.com/AHMZA/dot`
-* Run `./dot/dotInstall`
+* Run `.dot/dotInstall`
 
 ### Manual
 * Run `git clone https://gitlab.com/AHMZA/dot`
