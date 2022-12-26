@@ -1,0 +1,82 @@
+#!/bin/bash
+
+sudo -s <<'END_OF_SUDO'
+
+apt update
+apt install git
+apt install zsh
+
+echo
+echo "Install neovim"
+wget https://github.com/neovim/neovim/releases/download/stable/nvim-linux64.deb
+sudo apt install ./nvim-linux64.deb
+
+END_OF_SUDO
+
+if [ -d ./dot ]
+then
+  echo
+  echo "Folder Exists, Pulling latest ..."
+  git -C ./dot pull origin main
+else
+  echo
+  git clone https://gitlab.com/AHMZA/dot
+fi
+
+echo
+echo "Moving files ..."
+
+if [ -d $HOME/.config ]
+then
+  mv ./dot/.config/nvim $HOME/.config/
+else
+  mkdir $HOME/.config
+  mv ./dot/.config/nvim $HOME/.config/
+fi
+
+mv ./dot/.zsh $HOME/
+mv ./dot/.zsh_plugins $HOME/
+mv ./dot/.zshrc $HOME/
+
+echo
+echo "Files/Folders Moved"
+
+echo
+
+echo
+echo "Installing packer"
+git clone --depth 1 https://github.com/wbthomason/packer.nvim\
+ ~/.local/share/nvim/site/pack/packer/start/packer.nvim
+
+echo
+echo "Installing vim-plug"
+curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
+  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+
+echo
+echo "Installing antibody"
+if [ -d $HOME/bin ]
+then
+  curl -sfL git.io/antibody | sh -s - -b $HOME/bin
+else
+  mkdir $HOME/bin
+  curl -sfL git.io/antibody | sh -s - -b $HOME/bin
+fi
+
+antibody bundle < $HOME/.zsh_plugins > $HOME/.zsh_plugins.sh
+
+echo "Installing autojump"
+git clone https://github.com/wting/autojump.git
+echo "cd into the autojump folder"
+echo "run ./install.py"
+
+if [ $SHELL != "/usr/bin/zsh" ]
+then
+  chsh -s $(which zsh)
+fi
+
+sudo -s <<'END_OF_SUDO'
+rm -r ./dot ./nvim-linux64.deb
+END_OF_SUDO
+
+sudo -k
