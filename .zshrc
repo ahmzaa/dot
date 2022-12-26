@@ -31,7 +31,7 @@ setopt autocd extendedglob nomatch
 unsetopt beep notify
 bindkey -v
 
-source "$HOME/.zsh/aliases"
+source "$HOME/.zsh/alias"
 
 # AUTOJUMP
 source "/usr/local/etc/profile.d/autojump.sh"
