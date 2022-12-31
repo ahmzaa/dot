@@ -34,9 +34,9 @@ alias vi='nvim'
 
 alias sudo='sudo '
 
-alias ls='ls --color'
-alias ll='ls -l --color'
-alias la='ls -all --color'
+alias ls='ls -1 --color'
+alias ll='ls -lh --color'
+alias la='ls -alh --color'
 
 alias grep='grep --color'
 
