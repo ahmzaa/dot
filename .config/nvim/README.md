@@ -1,14 +1,14 @@
 # neovim configuration
+list of plugins and aliases for neovim
 
-This will go over all the config options that I have decided on.
+## Requirements
+- ripgrep (For telescope find string)
 
 ## Plugin Manager
-
 - [Packer](https://github.com/wbthomason/packer.nvim)
 - [Vim-Plug](https://github.com/junegunn/vim-plug) (For old plugins not yet migrated to Packer)
 
 ## Plugins
-
 - [airline](https://github.com/vim-airline/vim-airline)
 - [dracula](https://github.com/dracula/vim)
 - [floaterm](https://github.com/voldikss/vim-floaterm)
@@ -27,13 +27,11 @@ This will go over all the config options that I have decided on.
 ---
 
 ## Keymaps
-
 leader = space
 
 Capital letter = shift
 
 ### Floaterm
-
 | Keymap | Function        |
 |--------|-----------------|
 | F1     | Toggle floaterm |
@@ -42,20 +40,17 @@ Capital letter = shift
 | F4     | New floaterm    |
 
 ### Goyo
-
 | Keymap      | Function    |
 |-------------|-------------|
 | leader + gy | Toggle goyo |
 
 ### NERDTree
-
 | Keymap     | Function        |
 |------------|-----------------|
 | leader + n | Toggle nerdtree |
 | leader + N | Nerdtree find   |
 
 ### Telescope
-
 | Keymap      | Function       |
 |-------------|----------------|
 | leader + fs | Find string    |
@@ -65,7 +60,6 @@ Capital letter = shift
 | Ctrl + p    | Find Git Files |
 
 ### UndoTree
-
 | Keymap      | Function        |
 |-------------|-----------------|
 | leader + ut | Toggle undotree |
