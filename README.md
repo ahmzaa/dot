@@ -7,34 +7,6 @@ My dotfiles to configure zsh, vim and a few others.
 [[_TOC_]]
 </details>
 
-## prerequisites
-* Ensure using ZSH
-
-## alias usage
-
-### list
-- `ls` - `ls -1 --color`
-- `ll` - `ls -lh --color`
-- `la` - `ls -alh --color`
-
-### neovim
-- `vim` - `nvim`
-- `vi` - `nvim`
-
-### git (gx)
-- `ga` - `git add`
-- `gp` - `gitpush()` - git pull & git push
-- `gs` - `git status`
-- `gc` - `git commit`
-
-### docker
-- `dc` - `docker compose`
-- `dcu` - `docker compose up`
-- `dcd` - `docker compose down`
-
-### dotfiles
-- `dotconf` - `/usr/bin/git --git-dir=$HOME/.dot --work-tree=$HOME`
-
 ## Install Instructions
 ### Automatic
 - Clone the repo
@@ -89,6 +61,31 @@ chsh -s $(which zsh)
 ```
 
 - Logout and Login
+
+## alias usage
+
+### list
+- `ls` - `ls -1 --color`
+- `ll` - `ls -lh --color`
+- `la` - `ls -alh --color`
+
+### neovim
+- `vim` - `nvim`
+- `vi` - `nvim`
+
+### git (gx)
+- `ga` - `git add`
+- `gp` - `gitpush()` - git pull & git push
+- `gs` - `git status`
+- `gc` - `git commit`
+
+### docker
+- `dc` - `docker compose`
+- `dcu` - `docker compose up`
+- `dcd` - `docker compose down`
+
+### dotfiles
+- `dotconf` - `/usr/bin/git --git-dir=$HOME/.dot --work-tree=$HOME`
 
 ## Setting up bare repo
 - Setup a git bare repo
