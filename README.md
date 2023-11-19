@@ -21,7 +21,6 @@ git clone https://gitlab.com/AHMZA/dot
 ```
 .dot/dotInstall
 ```
-</details>
 
     <details>
     <summary>Flowchart</summary>
@@ -39,6 +38,7 @@ git clone https://gitlab.com/AHMZA/dot
     move-files-->install-packer-->install-vim-plug-->install-antibody-->run-antibody-->set-shell-zsh-->Request-Elevated-Permissions-->delete-source-files-->End-Elevated-Permissions;
     ```
     </details>
+</details>
 
 ### Manual
 
