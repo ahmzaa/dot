@@ -39,7 +39,8 @@ move-files-->install-packer-->install-vim-plug-->install-antibody-->run-antibody
 </details>
 </details>
 
-### Manual
+<details>
+<summary>Manual</summary>
 
 - Clone the Repository
 ```
@@ -65,6 +66,8 @@ chsh -s $(which zsh)
 ```
 
 - Logout and Login
+
+</details>
 
 ## alias usage
 
