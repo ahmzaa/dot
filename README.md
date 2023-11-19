@@ -3,6 +3,13 @@ My dotfiles to configure zsh, vim and a few others.
 
 [[_TOC_]]
 
+## Features
+- ZSH
+  - Antibody
+  - Spaceship
+- Neovim
+  - [README](.config/nvim/README.md)
+
 ## Install Instructions
 
 <details>
