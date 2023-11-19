@@ -1,8 +1,3 @@
----
-title: Dotfiles ···
-example:
-  language: yaml
----
 # Dotfiles ···
 My dotfiles to configure zsh, vim and a few others.
 
