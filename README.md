@@ -12,6 +12,9 @@ My dotfiles to configure zsh, vim and a few others.
 
 ## Install Instructions
 
+### Requirements
+- ripgrep (for telescope find string)
+
 <details>
 <summary>Automatic</summary>
 
