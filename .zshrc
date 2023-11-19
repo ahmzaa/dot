@@ -32,9 +32,7 @@ unsetopt beep notify
 bindkey -v
 
 source "$HOME/.zsh/alias"
-
-# AUTOJUMP
-source "/usr/local/etc/profile.d/autojump.sh"
+source "$HOME/.zsh/keys"
 
 # PATH EXPORTS
 export PATH="$HOME/bin:$PATH"

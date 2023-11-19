@@ -32,7 +32,7 @@ alias zshrc='${=EDITOR} ~/.zshrc'
 alias vim='nvim'
 alias vi='nvim'
 
-alias sudo='sudo '
+alias sudo='sudo ' # expands aliases
 
 alias ls='ls -1 --color'
 alias ll='ls -lh --color'
