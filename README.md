@@ -66,7 +66,7 @@ chsh -s $(which zsh)
 </details>
 
 <details>
-<summary>Setting up bare repo</summary>
+<summary>Setting up bare repo (applicable to maintainers)</summary>
 
 - Setup a git bare repo
 ```
