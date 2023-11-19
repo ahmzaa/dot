@@ -8,7 +8,10 @@ My dotfiles to configure zsh, vim and a few others.
 </details>
 
 ## Install Instructions
-### Automatic
+
+<details>
+<summary>Automatic</summary>
+
 - Clone the repo
 ```
 git clone https://gitlab.com/AHMZA/dot
@@ -18,6 +21,8 @@ git clone https://gitlab.com/AHMZA/dot
 ```
 .dot/dotInstall
 ```
+</details>
+
 <details>
 <summary>Flowchart</summary>
 <br>
