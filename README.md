@@ -65,6 +65,23 @@ chsh -s $(which zsh)
 
 </details>
 
+<details>
+<summary>Setting up bare repo</summary>
+
+- Setup a git bare repo
+```
+git init --bare $HOME/.dot
+```
+- Alias incase it gets removed from alias ...
+```
+alias dotconf='/usr/bin/git --git-dir=$HOME/.dot/ --work-tree=$HOME'
+```
+- Dont show untracked files
+```
+config --local status.showUntrackedFiles no
+```
+</details>
+
 ## alias usage
 
 ### list
@@ -89,20 +106,6 @@ chsh -s $(which zsh)
 
 ### dotfiles
 - `dotconf` - `/usr/bin/git --git-dir=$HOME/.dot --work-tree=$HOME`
-
-## Setting up bare repo
-- Setup a git bare repo
-```
-git init --bare $HOME/.dot
-```
-- Alias incase it gets removed from alias ...
-```
-alias dotconf='/usr/bin/git --git-dir=$HOME/.dot/ --work-tree=$HOME'
-```
-- Dont show untracked files
-```
-config --local status.showUntrackedFiles no
-```
 
 ## To Do
 - [ ] keybindings for markdown-preview
