@@ -23,22 +23,22 @@ git clone https://gitlab.com/AHMZA/dot
 ```
 </details>
 
-<details>
-<summary>Flowchart</summary>
-<br>
-<br>
+    <details>
+    <summary>Flowchart</summary>
+    <br>
+    <br>
 
-```mermaid
-graph TD;
-  Request-Elevated-Permissions-->apt-update-->install-git-->install-zsh-->install-neovim-->End-Elevated-Permissions;
-  End-Elevated-Permissions-->Check-if-'./dot'-exists;
-  Check-if-'./dot'-exists-->download-repo;
-  Check-if-'./dot'-exists-->pull-latest;
-  download-repo-->move-files;
-  pull-latest-->move-files;
-  move-files-->install-packer-->install-vim-plug-->install-antibody-->run-antibody-->set-shell-zsh-->Request-Elevated-Permissions-->delete-source-files-->End-Elevated-Permissions;
-```
-</details>
+    ```mermaid
+    graph TD;
+    Request-Elevated-Permissions-->apt-update-->install-git-->install-zsh-->install-neovim-->End-Elevated-Permissions;
+    End-Elevated-Permissions-->Check-if-'./dot'-exists;
+    Check-if-'./dot'-exists-->download-repo;
+    Check-if-'./dot'-exists-->pull-latest;
+    download-repo-->move-files;
+    pull-latest-->move-files;
+    move-files-->install-packer-->install-vim-plug-->install-antibody-->run-antibody-->set-shell-zsh-->Request-Elevated-Permissions-->delete-source-files-->End-Elevated-Permissions;
+    ```
+    </details>
 
 ### Manual
 
