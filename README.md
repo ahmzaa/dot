@@ -1,11 +1,7 @@
 # Dotfiles ···
 My dotfiles to configure zsh, vim and a few others.
 
-<details>
-<summary>Table of Contents</summary>
-
 [[_TOC_]]
-</details>
 
 ## Install Instructions
 
