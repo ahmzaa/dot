@@ -1,9 +1,0 @@
-configuration {
-	modi: "window,drun,ssh,combi";
-	fixed-num-lines: true;
-	show-icons: true;
-	icon-theme: "Papirus";
-	combi-modi: "window,drun,ssh";
-}
-
-@theme "solarized"

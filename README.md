@@ -88,7 +88,7 @@ alias dotconf='/usr/bin/git --git-dir=$HOME/.dot/ --work-tree=$HOME'
 ```
 - Dont show untracked files
 ```
-config --local status.showUntrackedFiles no
+dotconf config --local status.showUntrackedFiles no
 ```
 </details>
 
