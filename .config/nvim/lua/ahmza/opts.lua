@@ -33,8 +33,27 @@ vim.opt.scrolloff = 8
 vim.opt.sidescrolloff = 8
 vim.opt.clipboard = "unnamedplus"
 
-vim.cmd([[hi DraculaBoundry NONE]])
-vim.cmd([[hi DraculaDiffDelete NONE]])
-vim.cmd([[hi DraculaComment cterm=italic gui=italic]])
-
 vim.g.goyo_width = 120
+
+-- nvim-tree
+-- disable netrw at the very start of your init.lua
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
+
+-- set termguicolors to enable highlight groups
+vim.opt.termguicolors = true
+
+
+-- floaterm settings
+vim.g.floaterm_keymap_toggle = '<F1>'
+vim.g.floaterm_keymap_next   = '<F2>'
+vim.g.floaterm_keymap_prev   = '<F3>'
+vim.g.floaterm_keymap_new    = '<F4>'
+
+vim.g.floaterm_gitcommit='floaterm'
+vim.g.floaterm_autoinsert=1
+vim.g.floaterm_width=0.6
+vim.g.floaterm_height=0.5
+vim.g.floaterm_wintitle=1
+vim.g.floaterm_titleposition='center'
+vim.g.floaterm_autoclose=1

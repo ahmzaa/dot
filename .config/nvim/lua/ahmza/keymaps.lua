@@ -25,6 +25,8 @@ keymap('n','<C-l>','<C-W>l',opts)
 keymap('n','<leader>Q',':bufdo bdelete<cr>',opts)
 keymap('n','<leader>q',':bd<cr>',opts)
 
--- NerdTree Toggle
-keymap('n','<leader>n',':NERDTreeToggle<cr>',opts)
-keymap('n','<leader>N',':NERDTreeFind<cr>',opts)
+-- NvimTree Toggle
+keymap('n','<leader>n',':NvimTreeToggle<cr>',opts)
+keymap('n','<leader>N',':NvimTreeFind<cr>',opts)
+
+keymap('n','<leader>b','require("nvterm.terminal").new "horizontal"',opts)
