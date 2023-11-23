@@ -10,7 +10,7 @@ list of plugins and aliases for neovim
 
 ## Plugins
 - [Catppuccin](https://github.com/dracula/vim) - Theme
-- [floaterm](https://github.com/voldikss/vim-floaterm)
+- [floaterm](https://github.com/voldikss/vim-floaterm) - maybe replace with [toggleterm](https://github.com/akinsho/toggleterm.nvim)
 - [fugitive](https://github.com/tpope/vim-fugitive)
 - [goyo](https://github.com/junegunn/goyo.vim)
   - [limelight](https://github.com/junegunn/limelight.vim)
@@ -20,6 +20,10 @@ list of plugins and aliases for neovim
   - [plenary](https://github.com/nvim-lua/plenary.nvim)
   - [popup](https://github.com/nvim-lua/popup.nvim)
   - [telescope-fzy-native](https://github.com/nvim-telescope/telescope-fzy-native.nvim)
+- [treesitter](https://github.com/nvim-treesitter/nvim-treesitter)
+- [gitsigns](lewis6991/gitsigns.nvim)
+- [lualine](https://github.com/nvim-lualine/lualine.nvim)
+- [dashboard](https://github.com/nvimdev/dashboard-nvim)
 
 ---
 
@@ -41,7 +45,7 @@ Capital letter = shift
 |-------------|-------------|
 | leader + gy | Toggle goyo |
 
-### NERDTree
+### Nvim-Tree
 | Keymap     | Function        |
 |------------|-----------------|
 | leader + n | Toggle nerdtree |
@@ -55,8 +59,3 @@ Capital letter = shift
 | leader + fb | Find buffer    |
 | leader + fh | Find help      |
 | Ctrl + p    | Find Git Files |
-
-### UndoTree
-| Keymap      | Function        |
-|-------------|-----------------|
-| leader + ut | Toggle undotree |

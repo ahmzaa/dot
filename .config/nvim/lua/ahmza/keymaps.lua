@@ -28,5 +28,3 @@ keymap('n','<leader>q',':bd<cr>',opts)
 -- NvimTree Toggle
 keymap('n','<leader>n',':NvimTreeToggle<cr>',opts)
 keymap('n','<leader>N',':NvimTreeFind<cr>',opts)
-
-keymap('n','<leader>b','require("nvterm.terminal").new "horizontal"',opts)
