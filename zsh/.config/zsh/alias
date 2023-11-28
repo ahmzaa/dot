@@ -1,0 +1,53 @@
+#!/bin/sh
+
+#----------------------------------------------------------------------
+# General
+#----------------------------------------------------------------------
+
+export EDITOR=nvim
+alias zshrc='${=EDITOR} ~/.zshrc'
+alias vim='nvim'
+alias vi='nvim'
+
+alias sudo='sudo ' # expands aliases
+
+alias ls='ls -1 --color'
+alias ll='ls -lh --color'
+alias la='ls -alh --color'
+
+alias grep='grep --color'
+
+alias cp='cp -i'
+alias mv='mv -i'
+
+
+#----------------------------------------------------------------------
+# Git
+#----------------------------------------------------------------------
+
+gitpush() {
+    git pull
+    git push
+}
+
+alias ga="git add"
+alias gp=gitpush
+alias gs="git status"
+alias gc="git commit"
+
+# git bare repo aliases for dotfiles
+alias dotconf='/usr/bin/git --git-dir=$HOME/.dot --work-tree=$HOME'
+
+
+#----------------------------------------------------------------------
+# Docker
+#----------------------------------------------------------------------
+
+alias dc="docker-compose"
+alias dcu="docker-compose up -d"
+alias dcd="docker-compose down"
+
+
+#----------------------------------------------------------------------
+# Misc
+#----------------------------------------------------------------------
