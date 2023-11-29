@@ -25,9 +25,7 @@ Dotfiles to configure zsh, neovim and a few others.
  - ripgrep (use package manager)
 </details>
 
-<details>
-<summary>Automatic</summary>
-
+### Install
 - Clone the repo
 ```
 git clone https://gitlab.com/AHMZA/dot
@@ -55,8 +53,6 @@ chsh -s $(which zsh)
 ```
 
 - Logout and Login
-
-</details>
 
 ## alias usage
 
