@@ -12,7 +12,6 @@ Dotfiles to configure zsh, neovim and a few others.
 
 ## Install Instructions
 
-### Requirements
 <details>
 <summary>Requirements</summary>
 
