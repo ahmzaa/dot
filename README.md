@@ -74,6 +74,3 @@ chsh -s $(which zsh)
 
 
 **For more information on each of the configurations, check their respective READMEs**
-
-if you have any questions email me below
-[contact:support@ahmza.com]
