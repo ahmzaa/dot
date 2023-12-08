@@ -21,7 +21,6 @@ Dotfiles to configure zsh, neovim and a few others.
 <summary><h3>Requirements</h3></summary>
 
 ### Essential
-Tool to install raw files
 - stow (use package manager)
 
 ### Basic Setup
