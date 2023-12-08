@@ -3,18 +3,25 @@ Dotfiles to configure zsh, neovim and a few others.
 
 [[_TOC_]]
 
+**(Basic Setup)** = terminal only configuration, great for headless
+**(More than the terminal)** = configs for more than the terminal i.e window manager stuffs
+
 ## Features
-- ZSH
-  - Antibody
-  - Starship
-- Neovim
-  - [README](.config/nvim/README.md)
+
+- ZSH [README](zsh/.config/zsh/README.md) (Basic Setup)
+- Neovim [README](nvim/.config/nvim/README.md) (Basic Setup)
+- Hyprland [README](hypr/.config/hypr/README.md) (More than the terminal)
+- Kitty [README](kitty/.config/kitty/README.md) (More than the terminal)
+- Rofi [README](rofi/.config/rofi/README.md) (More than the terminal)
+- Waybar [README](waybar/.config/waybar/README.md) (More than the terminal)
+
 
 ## Install Instructions
 
 <details>
 <summary>Requirements</summary>
 
+### Basic Setup
 - stow (install the dotfiles with ease)
 - for zsh
  - [antibody](https://getantibody.github.io/install)
@@ -22,9 +29,16 @@ Dotfiles to configure zsh, neovim and a few others.
 - for nvim
  - [lazynvim](https://github.com/folke/lazy.nvim)
  - ripgrep (use package manager)
+### More than the terminal
+- [Hyprland](https://github.com/hyprwm/Hyprland)
+- [Kitty](https://sw.kovidgoyal.net/kitty/)
+- [Rofi](https://github.com/lbonn/rofi)
+- [Waybar](https://github.com/Alexays/Waybar)
+
 </details>
 
 ### Install
+- Check the requirements section above.
 - Clone the repo
 ```
 git clone https://gitlab.com/AHMZA/dot
@@ -53,33 +67,8 @@ chsh -s $(which zsh)
 
 - Logout and Login
 
-## alias usage
 
-### list
-- `ls` - `ls -1 --color`
-- `ll` - `ls -lh --color`
-- `la` - `ls -alh --color`
+**For more information on each of the configurations, check their respective READMEs**
 
-### neovim
-- `vim` - `nvim`
-- `vi` - `nvim`
-
-### git (gx)
-- `ga` - `git add`
-- `gp` - `gitpush()` - git pull & git push
-- `gs` - `git status`
-- `gc` - `git commit`
-
-### docker
-- `dc` - `docker compose`
-- `dcu` - `docker compose up`
-- `dcd` - `docker compose down`
-
-### dotfiles
-- `dotconf` - `/usr/bin/git --git-dir=$HOME/.dot --work-tree=$HOME`
-
-## To Do
-- [ ] keybindings for markdown-preview
-
-## Questions ?
+if you have any questions email me below
 [contact:support@ahmza.com]
