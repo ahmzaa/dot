@@ -18,7 +18,7 @@ Dotfiles to configure zsh, neovim and a few others.
 ## Install Instructions
 
 <details>
-<summary>Requirements</summary>
+<summary>## Requirements</summary>
 
 ### Basic Setup
 - stow (install the dotfiles with ease)
