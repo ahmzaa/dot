@@ -23,23 +23,22 @@ Dotfiles to configure zsh, neovim and a few others.
 ### Essential
 Tool to install raw files
 - stow (use package manager)
+
 ### Basic Setup
 For zsh
  - zsh (use package manager)
  - [antibody](https://getantibody.github.io/install)
  - [starship](https://starship.rs/guide/#%F0%9F%9A%80-installation)
+
 For nvim
  - [neovim](https://github.com/neovim/neovim)
  - [lazynvim](https://github.com/folke/lazy.nvim)
  - ripgrep (use package manager)
+
 ### More than the terminal
-Window Manager
  - [Hyprland](https://github.com/hyprwm/Hyprland)
-Terminal Emulater
  - [Kitty](https://sw.kovidgoyal.net/kitty/)
-Application Launcher
  - [Rofi](https://github.com/lbonn/rofi)
-Status Bar
  - [Waybar](https://github.com/Alexays/Waybar)
 
 </details>
