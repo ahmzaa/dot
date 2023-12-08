@@ -1,9 +1,8 @@
 # Dotfiles ···
 Dotfiles to configure zsh, neovim and a few others.
 
-[[_TOC_]]
-
 **(Basic Setup)** = terminal only configuration, great for headless
+
 **(More than the terminal)** = configs for more than the terminal i.e window manager stuffs
 
 ## Features
