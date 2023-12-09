@@ -10,8 +10,8 @@ prompt-color = #f38ba8
 selection-color = #f9e2af
 
 ### Window Theming
-width = 500
-height = 500
+width = 400
+height = 400
 background-color = #1e1e2e
 outline-width = 0
 border-width = 0
@@ -26,4 +26,6 @@ hide-cursor = true
 history = true
 drun-launch = true
 terminal = kitty
-
+num-results = 14
+ascii-input = true
+late-keyboard-init = true
