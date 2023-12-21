@@ -1,0 +1,16 @@
+#!/bin/sh
+
+CONFIG_FILES="$HOME/.config/waybar/config $HOME/.config/waybar/style.css $HOME/.config/waybar/mocha.css"
+
+trap "killall waybar" EXIT
+
+if pgrep -x waybar
+then
+  killall -e waybar
+fi
+
+while true; do
+  waybar &
+  inotifywait -e create,modify $CONFIG_FILES
+  killall waybar
+done
