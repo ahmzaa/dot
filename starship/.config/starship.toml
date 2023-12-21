@@ -16,7 +16,7 @@ right_format = """$all"""
 
 
 [hostname]
-ssh_only = false
+ssh_only = true
 format = '[$ssh_symbol](bold blue) @ [$hostname](bold red)'
 
 [aws]
