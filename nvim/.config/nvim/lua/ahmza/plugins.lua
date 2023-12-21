@@ -12,29 +12,36 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 local plugins = {
+  -- LSP stuff
+  {'williamboman/mason.nvim'},
+  {'williamboman/mason-lspconfig.nvim'},
+  {'VonHeikemen/lsp-zero.nvim', branch = 'v3.x'},
+  {'neovim/nvim-lspconfig'},
+  {'hrsh7th/cmp-nvim-lsp'},
+  {'hrsh7th/nvim-cmp'},
+  {'L3MON4D3/LuaSnip'},
+
+
+  {'nvim-treesitter/nvim-treesitter'},
+  {'lewis6991/gitsigns.nvim'},
+  {'voldikss/vim-floaterm'},
+  {'tpope/vim-fugitive'},
+  {'ThePrimeagen/harpoon', branch = 'harpoon2'},
+
   {
     "catppuccin/nvim",
     name = "catppuccin",
     priority = 1000,
-    config = function() require 'ahmza.catppuccin' end
-  },
-
-  {
-    'tpope/vim-fugitive',
-    name = "vim-fugitive"
   },
 
   {
     'junegunn/goyo.vim',
-    config = function() require 'ahmza.goyo' end
+    dependencies = {'junegunn/limelight.vim'},
   },
 
-  { 'junegunn/limelight.vim' },
-    config = function() require 'ahmza.limelight' end,
   {
     'nvim-tree/nvim-tree.lua',
     dependencies = {'nvim-tree/nvim-web-devicons'},
-    config = function() require 'ahmza.nvim-tree' end
   },
 
   {
@@ -42,34 +49,20 @@ local plugins = {
     dependencies = {
       'nvim-lua/popup.nvim',
       'nvim-lua/plenary.nvim',
+      'debugloop/telescope-undo.nvim',
       'nvim-telescope/telescope-fzy-native.nvim',
-      {
-        'nvim-treesitter/nvim-treesitter',
-        config = function() require 'ahmza.treesitter' end
-      },
     },
-    config = function() require 'ahmza.telescope' end
   },
 
-  {
-    'lewis6991/gitsigns.nvim',
-    config = function() require 'ahmza.gitsigns' end
-  },
-
-  {
-    'voldikss/vim-floaterm'
-  },
 
   {
     'nvim-lualine/lualine.nvim',
     dependencies = {'nvim-tree/nvim-web-devicons'},
-    config = function() require 'ahmza.lualine' end
   },
 
   {
     'nvimdev/dashboard-nvim',
     event = 'VimEnter',
-    config = function() require 'ahmza.dashboard' end,
     dependencies = {'nvim-tree/nvim-web-devicons'}
   }
 }
