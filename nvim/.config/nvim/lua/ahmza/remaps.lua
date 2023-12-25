@@ -25,6 +25,12 @@ vim.keymap.set('n', '<leader>y', "\"+y", opts)
 vim.keymap.set('v', '<leader>y', "\"+y", opts)
 vim.keymap.set('n', '<leader>Y', "\"+Y", opts)
 
+-- fugitive (git)
+vim.keymap.set('n', '<leader>gp', function()
+    vim.cmd('Git pull')
+    vim.cmd('Git push')
+end, opts)
+
 -- Launch tmux-sessionizer.
 vim.keymap.set('n', '<C-f>', '<cmd>silent !tmux neww tmux-sessionizer<CR>', opts)
 
