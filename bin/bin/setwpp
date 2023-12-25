@@ -1,0 +1,15 @@
+#!/bin/sh
+
+# $1 being an image file name
+
+if [ -z "$1" ];
+then
+  echo "No image provided"
+  WALLPP=`cat $HOME/.cache/wallpp`
+  killall -e swaybg
+  swaybg -o eDP-1 -i $WALLPP
+else
+  WALLPP=`pwd`/$1
+  echo $WALLPP > $HOME/.cache/wallpp
+  hyprctl reload
+fi
