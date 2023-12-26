@@ -7,7 +7,7 @@ then
   echo "No image provided"
   WALLPP=`cat $HOME/.cache/wallpp`
   killall -e swaybg
-  swaybg -o eDP-1 -i $WALLPP
+  swaybg -i $WALLPP
 else
   WALLPP=`pwd`/$1
   echo $WALLPP > $HOME/.cache/wallpp
