@@ -1,5 +1,7 @@
 {::options parse_block_html="true" /}
 
+{: #tanuki-orange}
+
 # Dotfiles ···
 
 My warning paragraph.
