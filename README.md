@@ -1,4 +1,8 @@
 # Dotfiles ···
+
+README is WIP
+{: .alert .alert_warning}
+
 Dotfiles to configure zsh, neovim and a few others.
 
 **(Basic Setup)** = terminal only configuration, great for headless
