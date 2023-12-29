@@ -8,6 +8,17 @@ My warning paragraph.
 {: .alert .alert_warning}
 </div>
 
+<div class="panel panel-warning">
+**Warning**
+{: .panel-heading}
+<div class="panel-body">
+
+WARNING DESCRIPTION
+
+</div>
+</div>
+
+
 
 
 Dotfiles to configure zsh, neovim and a few others.
