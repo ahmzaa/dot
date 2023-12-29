@@ -1,4 +1,7 @@
 # Dotfiles ···
+
+❤️ README is WIP
+
 Dotfiles to configure zsh, neovim and a few others.
 
 **(Basic Setup)** = terminal only configuration, great for headless
