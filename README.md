@@ -1,5 +1,8 @@
 # Dotfiles ···
 
+My warning paragraph.
+{: .alert .alert-warning}
+
 README is WIP
 {: .alert .alert_warning}
 
