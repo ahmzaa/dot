@@ -1,3 +1,5 @@
+{::options parse_block_html="true" /}
+
 # Dotfiles ···
 
 My warning paragraph.
