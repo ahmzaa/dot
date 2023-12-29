@@ -98,3 +98,5 @@ chsh -s $(which zsh)
 
 
 **For more information on each of the configurations, check their respective READMEs**
+
+{::options parse_block_html="false" /}
