@@ -3,8 +3,12 @@
 My warning paragraph.
 {: .alert .alert-warning}
 
-README is WIP
+<div class="panel panel-warning">
+**README is WIP**
 {: .alert .alert_warning}
+</div>
+
+
 
 Dotfiles to configure zsh, neovim and a few others.
 
