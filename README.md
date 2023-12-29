@@ -1,29 +1,6 @@
-{::options parse_block_html="true" /}
-
-{: #tanuki-orange}
-
 # Dotfiles ···
 
-My warning paragraph.
-{: .alert .alert-warning}
-
-<div class="panel panel-warning">
-**README is WIP**
-{: .alert .alert_warning}
-</div>
-
-<div class="panel panel-warning">
-**Warning**
-{: .panel-heading}
-<div class="panel-body">
-
-WARNING DESCRIPTION
-
-</div>
-</div>
-
-
-
+❤️ README is WIP
 
 Dotfiles to configure zsh, neovim and a few others.
 
@@ -100,5 +77,3 @@ chsh -s $(which zsh)
 
 
 **For more information on each of the configurations, check their respective READMEs**
-
-{::options parse_block_html="false" /}
