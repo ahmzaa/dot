@@ -27,6 +27,8 @@
 #----------------------------------------------------------------------
 # General
 #----------------------------------------------------------------------
+zmodload zsh/zprof
+
 setopt autocd extendedglob nomatch
 unsetopt beep notify
 bindkey -v
@@ -87,3 +89,5 @@ bindkey '^[[B' history-substring-search-down
 #----------------------------------------------------------------------
 
 eval "$(starship init zsh)"
+
+echo "$(cat $HOME/.config/zsh/banner)" | lolcat
