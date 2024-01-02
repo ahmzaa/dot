@@ -27,8 +27,7 @@
 }
 
 #clock, #battery, #network, #pulseaudio, #wireplumber, #tray, #idle_inhibitor, #mpd {
-  padding-left: .6rem;
-  padding-right: 1rem;
+  padding: .6rem;
 }
 
 /* Bar */
