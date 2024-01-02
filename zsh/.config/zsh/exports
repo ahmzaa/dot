@@ -3,13 +3,10 @@
 #----------------------------------------------------------------------
 # Path Exports
 #----------------------------------------------------------------------
-<<<<<<< Updated upstream
 export PATH=$HOME/bin:$PATH
 export PATH=$HOME/.local/bin:$PATH
 export PATH=$PATH:/usr/local/go/bin
 export PATH=$PATH:$HOME/go/bin
 
+# Rustup
 source "$HOME/.cargo/env"
-=======
-export PATH="$HOME/bin:$PATH"
->>>>>>> Stashed changes
