@@ -33,6 +33,7 @@ bindkey -v
 
 source "$HOME/.config/zsh/alias"
 source "$HOME/.config/zsh/exports"
+source "$HOME/.config/zsh/specific"
 
 # ANTIGEN PLUGINS
 # Load plugin changes by running
