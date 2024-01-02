@@ -36,8 +36,8 @@ local plugins = {
   },
 
   {
-    'junegunn/goyo.vim',
-    dependencies = {'junegunn/limelight.vim'},
+    'folke/zen-mode.nvim',
+    dependencies = {'folke/twilight.nvim'},
   },
 
   {

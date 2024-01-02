@@ -61,3 +61,6 @@ vim.keymap.set('n', '<leader><leader>', function() vim.cmd('so') end, opts)
 -- Delete single/all buffers
 keymap('n', '<leader>Q', '<nop>', opts)
 keymap('n', '<leader>q', ':bd<cr>', opts)
+
+-- Enable Twilight
+vim.keymap.set('n', '<leader>gy', ':ZenMode<cr>', opts)
