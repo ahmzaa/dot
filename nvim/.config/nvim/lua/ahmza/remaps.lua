@@ -31,6 +31,12 @@ vim.keymap.set('n', '<leader>gp', function()
     vim.cmd('Git push')
 end, opts)
 
+-- Enable Twilight
+vim.keymap.set('n', '<leader>gy', ':ZenMode<cr>', opts)
+
+-- Open terminal window
+vim.keymap.set('n', '<leader>t', ':term<cr>', opts)
+
 -- Launch tmux-sessionizer.
 vim.keymap.set('n', '<C-f>', '<cmd>silent !tmux neww tmux-sessionizer<CR>', opts)
 
@@ -62,5 +68,3 @@ vim.keymap.set('n', '<leader><leader>', function() vim.cmd('so') end, opts)
 keymap('n', '<leader>Q', '<nop>', opts)
 keymap('n', '<leader>q', ':bd<cr>', opts)
 
--- Enable Twilight
-vim.keymap.set('n', '<leader>gy', ':ZenMode<cr>', opts)
