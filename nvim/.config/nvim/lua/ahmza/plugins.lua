@@ -17,17 +17,37 @@ local plugins = {
   {'williamboman/mason-lspconfig.nvim'},
   {'VonHeikemen/lsp-zero.nvim', branch = 'v3.x'},
   {'neovim/nvim-lspconfig'},
-  {'hrsh7th/cmp-nvim-lsp'},
-  {'hrsh7th/nvim-cmp'},
-  {'L3MON4D3/LuaSnip'},
-  {'stevearc/oil.nvim'},
-
+  {
+    'hrsh7th/nvim-cmp',
+    event = "InsertEnter",
+    dependencies = {
+      'hrsh7th/cmp-nvim-lsp',
+      'hrsh7th/cmp-buffer', -- source for text in buffer
+      'hrsh7th/cmp-path', -- source for filesystem paths in commands
+      'L3MON4D3/LuaSnip', -- snippet engine
+      'saadparwaiz1/cmp_luasnip', -- lua autocompletion
+      'rafamadriz/friendly-snippets', -- snippets library
+      'onsails/lspkind.nvim', -- pictograms
+    },
+  },
 
   {'nvim-treesitter/nvim-treesitter'},
   {'lewis6991/gitsigns.nvim'},
   {'voldikss/vim-floaterm'},
   {'tpope/vim-fugitive'},
   {'ThePrimeagen/harpoon', branch = 'harpoon2'},
+  {'stevearc/oil.nvim'},
+
+
+  {
+    'mfussenegger/nvim-lint',
+    event = {'BufReadPre','BufNewFile'}
+  },
+
+  {
+    'stevearc/conform.nvim',
+    event = {'BufReadPre','BufNewFile'}
+  },
 
   {
     "catppuccin/nvim",
