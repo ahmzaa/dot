@@ -5,9 +5,7 @@
 #----------------------------------------------------------------------
 
 export EDITOR=nvim
-alias zshrc='${=EDITOR} ~/.zshrc'
 alias vim='nvim'
-alias vi='nvim'
 
 alias sudo='sudo ' # expands aliases
 
@@ -16,9 +14,6 @@ alias ll='ls -lh --color'
 alias la='ls -alh --color'
 
 alias grep='grep --color'
-
-alias cp='cp -i'
-alias mv='mv -i'
 
 
 #----------------------------------------------------------------------
@@ -35,9 +30,6 @@ alias gp=gitpush
 alias gs="git status"
 alias gc="git commit"
 
-# git bare repo aliases for dotfiles
-alias dotconf='/usr/bin/git --git-dir=$HOME/.dot --work-tree=$HOME'
-
 
 #----------------------------------------------------------------------
 # Docker
@@ -53,3 +45,4 @@ alias dcd="docker-compose down"
 #----------------------------------------------------------------------
 
 alias s="kitten ssh"
+alias icat="kitten icat"

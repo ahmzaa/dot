@@ -17,17 +17,31 @@ local plugins = {
   {'williamboman/mason-lspconfig.nvim'},
   {'VonHeikemen/lsp-zero.nvim', branch = 'v3.x'},
   {'neovim/nvim-lspconfig'},
-  {'hrsh7th/cmp-nvim-lsp'},
   {'hrsh7th/nvim-cmp'},
-  {'L3MON4D3/LuaSnip'},
-  {'stevearc/oil.nvim'},
-
+  {'hrsh7th/cmp-nvim-lsp'},
+  {'L3MON4D3/LuaSnip'}, -- snippet engine
+  {'saadparwaiz1/cmp_luasnip'}, -- lua autocompletion
+  {'rafamadriz/friendly-snippets'}, -- snippets library
+  {'mfussenegger/nvim-lint'},
+  {'stevearc/conform.nvim'},
 
   {'nvim-treesitter/nvim-treesitter'},
   {'lewis6991/gitsigns.nvim'},
   {'voldikss/vim-floaterm'},
   {'tpope/vim-fugitive'},
   {'ThePrimeagen/harpoon', branch = 'harpoon2'},
+  {'stevearc/oil.nvim'},
+
+
+--  {
+--    'mfussenegger/nvim-lint',
+--    event = {'BufReadPre','BufNewFile'}
+--  },
+
+--  {
+--    'stevearc/conform.nvim',
+--    event = {'BufReadPre','BufNewFile'}
+--  },
 
   {
     "catppuccin/nvim",
@@ -36,8 +50,8 @@ local plugins = {
   },
 
   {
-    'junegunn/goyo.vim',
-    dependencies = {'junegunn/limelight.vim'},
+    'folke/zen-mode.nvim',
+    dependencies = {'folke/twilight.nvim'},
   },
 
   {

@@ -27,12 +27,15 @@
 #----------------------------------------------------------------------
 # General
 #----------------------------------------------------------------------
+zmodload zsh/zprof
+
 setopt autocd extendedglob nomatch
 unsetopt beep notify
 bindkey -v
 
 source "$HOME/.config/zsh/alias"
 source "$HOME/.config/zsh/exports"
+source "$HOME/.config/zsh/specific"
 
 # ANTIGEN PLUGINS
 # Load plugin changes by running
@@ -86,3 +89,5 @@ bindkey '^[[B' history-substring-search-down
 #----------------------------------------------------------------------
 
 eval "$(starship init zsh)"
+
+echo "$(cat $HOME/.config/zsh/banner)" | lolcat
