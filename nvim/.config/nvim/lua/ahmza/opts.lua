@@ -36,7 +36,7 @@ vim.opt.updatetime = 50
 
 vim.opt.list = true
 vim.opt.listchars = "trail:-"
---vim.opt.clipboard = "unnamedplus"
+vim.opt.clipboard = "unnamedplus"
 
 -- Goyo
 vim.g.goyo_width = 120

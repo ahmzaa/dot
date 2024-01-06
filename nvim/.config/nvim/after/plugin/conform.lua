@@ -4,6 +4,7 @@ conform.setup({
     formatters_by_ft = {
         markdown = {'prettierd', 'prettier'},
         python = {'black'},
+        go = {'gofumpt'},
     },
 })
 
