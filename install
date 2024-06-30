@@ -1,0 +1,66 @@
+#!/bin/bash
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NC='\033[0m' # No Color
+
+printf "\nWelcome to the install script.\n\n"
+printf "${RED}This will install basic terminal setup requirements${NC}\n"
+printf "${RED}- zsh\n- stow\n- neovim\n- lolcat\n- ripgrep\n- fd-find\n- antibody\n- starship${NC}\n\n"
+printf "${RED}As well as some build dependancies for nvim${NC}\n"
+printf "${RED}- curl\n- unzip\n- cmake\n- gettext\n- ninja-build\n- build-essential${NC}\n\n"
+printf "${GREEN}Would you like to continue${NC}\n"
+
+select yn in "Yes" "No"; do
+    case $yn in
+        Yes ) break;;
+        No ) exit ;;
+    esac
+done
+
+sudo /bin/bash <<EOF
+    apt install stow zsh ripgrep lolcat fd-find ninja-build gettext cmake unzip curl build-essential
+    curl -sfL git.io/antibody | sh -s - -b /usr/local/bin
+    curl -sS https://starship.rs/install.sh | sh -s -- -y
+EOF
+
+printf "\n${GREEN}Installing NeoVim from source${NC}\n"
+
+
+# Install NeoVim from source (latest stable)
+git clone https://github.com/neovim/neovim $HOME/src/neovim
+pushd $HOME/src/neovim
+git checkout stable
+make CMAKE_BUILD_TYPE=RelWithDebInfo
+pushd build && cpack -G DEB && sudo dpkg -i nvim-linux64.deb
+popd
+popd
+
+printf "\n${GREEN}Would you like to stow the basics now?${NC}\n"
+printf "\n${GREEN}- zsh\n- nvim\n- starship${NC}\n\n"
+
+select yn in "Yes" "No"; do
+    case $yn in
+        Yes ) break;;
+        No ) exit ;;
+    esac
+done
+
+cd $HOME/dot
+stow zsh
+stow nvim
+stow starship
+
+
+antibody bundle < ~/.config/zsh/plugins > ~/.zsh_plugins
+
+printf "\n${GREEN}Would you like to change your shell to zsh now?${NC}\n"
+
+select yn in "Yes" "No"; do
+    case $yn in
+        Yes ) break;;
+        No ) exit ;;
+    esac
+done
+
+chsh -s $(which zsh)
