@@ -35,11 +35,11 @@ bindkey -v
 
 source "$HOME/.config/zsh/alias"
 source "$HOME/.config/zsh/exports"
-source "$HOME/.config/zsh/specific"
+source "$HOME/.config/zsh/os-specific.sh"
 
-# ANTIGEN PLUGINS
+# ANTIDOTE PLUGINS
 # Load plugin changes by running
-# antibody bundle < ~/.config/zsh/plugins > ~/.zsh_plugins
+# antidote bundle < ~/.config/zsh/plugins > ~/.zsh_plugins
 source "$HOME/.zsh_plugins"
 
 # SSH AGENT
