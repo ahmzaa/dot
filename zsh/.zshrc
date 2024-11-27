@@ -91,3 +91,10 @@ bindkey '^[[B' history-substring-search-down
 eval "$(starship init zsh)"
 
 echo "$(cat $HOME/.config/zsh/banner)" | lolcat
+
+
+#----------------------------------------------------------------------
+# Load Zoxide
+#----------------------------------------------------------------------
+
+eval "$(zoxide init zsh)"
