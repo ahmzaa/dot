@@ -1,0 +1,5 @@
+# AntiDote
+source /opt/homebrew/opt/antidote/share/antidote/antidote.zsh
+
+# HomeBrew
+eval "$(/opt/homebrew/bin/brew shellenv)"
