@@ -6,10 +6,11 @@ if [ -z "$1" ];
 then
   echo "No image provided"
   WALLPP=`cat $HOME/.cache/wallpp`
-  killall -e swaybg
-  swaybg -i $WALLPP
+  hyprctl hyprpaper preload "$WALLPP"
+  hyprctl hyprpaper wallpaper ", $WALLPP"
 else
   WALLPP=`pwd`/$1
   echo $WALLPP > $HOME/.cache/wallpp
-  hyprctl reload
+  hyprctl hyprpaper preload "$WALLPP"
+  hyprctl hyprpaper wallpaper ", $WALLPP"
 fi
