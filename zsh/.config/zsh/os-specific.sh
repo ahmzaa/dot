@@ -1,7 +1,10 @@
-#!/bin/env bash
+#!/usr/bin/env bash
 
-OS=`uname -r`
+OS=`uname -o`
 
-if [[ OS = "Darwin" ]] then
+echo $OS
+
+if [ $OS = "Darwin" ]; then
+    echo "device is MacOS"
     source ~/.config/zsh/mac
 fi
