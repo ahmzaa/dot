@@ -33,6 +33,7 @@ setopt autocd extendedglob nomatch
 unsetopt beep notify
 bindkey -v
 
+source "$HOME/.config/zsh/nix"
 source "$HOME/.config/zsh/alias"
 source "$HOME/.config/zsh/exports"
 source "$HOME/.config/zsh/os-specific.sh"
