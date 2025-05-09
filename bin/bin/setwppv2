@@ -2,18 +2,25 @@
 
 # $1 being an image file name
 
+monitors=`hyprctl monitors | grep Monitor | awk '{print $2}'`
+
 if [ -z "$1" ];
 then
   echo "No image provided"
   echo "Refreshing Hyprpaper from last cached wallpaper."
   WALLPP=`cat $HOME/.cache/wallpp`
   hyprctl hyprpaper preload "$WALLPP"
-  hyprctl hyprpaper wallpaper ", $WALLPP"
+  for i in $monitors; do
+    hyprctl hyprpaper wallpaper "$i, $WALLPP";
+  done;
 else
   WALLPP=`pwd`/$1
   echo $WALLPP > $HOME/.cache/wallpp
   echo "preload="$WALLPP > $HOME/.config/hypr/hyprpaper.conf
-  echo "wallpaper="$WALLPP >> $HOME/.config/hypr/hyprpaper.conf
+  echo "wallpaper=, "$WALLPP >> $HOME/.config/hypr/hyprpaper.conf
   hyprctl hyprpaper preload "$WALLPP"
-  hyprctl hyprpaper wallpaper ", $WALLPP"
+  for i in $monitors; do
+    hyprctl hyprpaper wallpaper "$i, $WALLPP";
+  done;
 fi
+
