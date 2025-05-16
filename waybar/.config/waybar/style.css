@@ -1,4 +1,4 @@
-@import "mocha.css";
+@import "rose-pine.css";
 
 /* Global */
 * {
@@ -44,7 +44,7 @@ window > box {
 /* Workspaces */
 /* https://github.com/Alexays/Waybar/wiki/FAQ#the-workspace-buttons-have-a-strange-hover-effect */
 #workspaces:hover {
-  background-color: @green;
+  background-color: @pine
 }
 
 #workspaces button {
@@ -59,7 +59,7 @@ window > box {
 
 
 #workspaces button:hover {
-  color: @rosewater;
+  color: @rose;
 }
 
 /* Tooltip */
@@ -93,13 +93,13 @@ tooltip label {
 
 /* extra */
 #clock {
-  color: @rosewater;
+  color: @rose;
 }
 #idle_inhibitor {
   color: @foreground;
 }
 #idle_inhibitor.activated {
-  color: @green;
+  color: @rose;
 }
 #pulseaudio {
   color: @mauve;
