@@ -33,7 +33,6 @@ setopt autocd extendedglob nomatch
 unsetopt beep notify
 bindkey -v
 
-source "$HOME/.config/zsh/nix"
 source "$HOME/.config/zsh/alias"
 source "$HOME/.config/zsh/exports"
 source "$HOME/.config/zsh/os-specific.sh"
@@ -44,7 +43,7 @@ source "$HOME/.config/zsh/os-specific.sh"
 source "$HOME/.zsh_plugins"
 
 # SSH AGENT
-source "$HOME/.config/zsh/ssh-agent"
+# source "$HOME/.config/zsh/ssh-agent"
 
 
 #----------------------------------------------------------------------
@@ -66,6 +65,11 @@ setopt always_to_end
 zstyle ':completion:*' menu select
 zstyle ':completion:*' group-name ''
 zstyle ':completion:::::' completer _expand _complete _ignored _approximate
+
+# Carapace.sh
+export CARAPACE_BRIDGES='zsh,fish,bash,inshellisense' # optional
+zstyle ':completion:*' format $'\e[2;37mCompleting %d\e[m'
+source <(carapace _carapace)
 
 #----------------------------------------------------------------------
 # History
@@ -100,6 +104,19 @@ echo "$(cat $HOME/.config/zsh/banner)" | lolcat
 
 eval "$(zoxide init zsh)"
 
+#----------------------------------------------------------------------
+# Load Node Version Manager
+#----------------------------------------------------------------------
+
 export NVM_DIR="$HOME/.config/nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+
+#----------------------------------------------------------------------
+# Load Python Version Manager
+#----------------------------------------------------------------------
+
+export PYENV_ROOT="$HOME/.pyenv"
+[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init - zsh)"

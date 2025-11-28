@@ -6,7 +6,4 @@ zsh-users/zsh-syntax-highlighting
 zsh-users/zsh-history-substring-search
 zsh-users/zsh-autosuggestions
 
-#spaceship-prompt/spaceship-prompt
-
-
-#antibody bundle < ~/.zsh_plugins > ~/.zsh_plugins.sh
+# antibody bundle < ~/.zsh_plugins > ~/.zsh_plugins.sh

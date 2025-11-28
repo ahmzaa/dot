@@ -9,6 +9,6 @@ if [ $OS = "Darwin" ]; then
 fi
 
 if [ $NAME = "shadow" ]; then
-    echo "device is shadow"
+    echo "device is Shadow"
     source ~/.config/zsh/shadow
 fi
