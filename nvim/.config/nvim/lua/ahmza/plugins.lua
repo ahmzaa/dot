@@ -22,7 +22,7 @@ local plugins = {
 		dependencies = {
 			"nvim-lua/plenary.nvim",
 			{
-				"nvim-telescope/telescope-fzy-native.nvim",
+				"nvim-telescope/telescope-fzf-native.nvim",
 				build = "make",
 				cond = function()
 					return vim.fn.executable("make") == 1
@@ -75,7 +75,8 @@ local plugins = {
 		},
 	},
 	{
-		"folke/tokyonight.nvim",
+		"catppuccin/nvim",
+		name = "catppuccin",
 		priority = 1000, -- Loaded before all other start plugins
 	},
 	{
