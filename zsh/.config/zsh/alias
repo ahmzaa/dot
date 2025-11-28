@@ -13,6 +13,10 @@ alias ls='ls -1 --color'
 alias ll='ls -lh --color'
 alias la='ls -alh --color'
 
+alias lsd='lsd -1'
+alias lsdl='lsd -lh'
+alias lsda='lsd -alh'
+
 alias grep='grep --color'
 
 
@@ -38,3 +42,15 @@ alias gc="git commit"
 alias dc="docker-compose"
 alias dcu="docker-compose up -d"
 alias dcd="docker-compose down"
+
+#----------------------------------------------------------------------
+# yazi
+#----------------------------------------------------------------------
+
+function y() {
+	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
+	yazi "$@" --cwd-file="$tmp"
+	IFS= read -r -d '' cwd < "$tmp"
+	[ -n "$cwd" ] && [ "$cwd" != "$PWD" ] && builtin cd -- "$cwd"
+	rm -f -- "$tmp"
+}
