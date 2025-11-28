@@ -20,9 +20,6 @@
 - `dcu` - `docker compose up`
 - `dcd` - `docker compose down`
 
-### dotfiles
-- `dotconf` - `/usr/bin/git --git-dir=$HOME/.dot --work-tree=$HOME`
-
 ## To Do
 - [ ] keybindings for markdown-preview
 
