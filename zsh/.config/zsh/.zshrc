@@ -27,56 +27,45 @@
 #----------------------------------------------------------------------
 # General
 #----------------------------------------------------------------------
-zmodload zsh/zprof
-
 setopt autocd extendedglob nomatch
 unsetopt beep notify
 bindkey -v
 
-source "$HOME/.config/zsh/alias"
-source "$HOME/.config/zsh/exports"
-source "$HOME/.config/zsh/os-specific.sh"
-
-# ANTIDOTE PLUGINS
-# Load plugin changes by running
-# antidote bundle < ~/.config/zsh/plugins > ~/.zsh_plugins
-source "$HOME/.zsh_plugins"
+source "$ZDOTDIR/alias"
+source "$ZDOTDIR/os-specific.sh"
 
 # SSH AGENT
-# source "$HOME/.config/zsh/ssh-agent"
+source "$ZDOTDIR/ssh-agent"
+
+# Generated for envman. Do not edit.
+[ -s "$HOME/.config/envman/load.sh" ] && source "$HOME/.config/envman/load.sh"
+
+
+#----------------------------------------------------------------------
+# Antidote Plugins - Lazy-load antidote conditionally gen static load file
+#----------------------------------------------------------------------
+zsh_plugins=${ZDOTDIR}/plugins
+if [[ ! ${zsh_plugins}.zsh -nt ${zsh_plugins} ]]; then
+  (
+    source $ZDOTDIR/.antidote/antidote.zsh
+    antidote bundle <${zsh_plugins} >${zsh_plugins}.zsh
+  )
+fi
+source ${zsh_plugins}.zsh
 
 
 #----------------------------------------------------------------------
 # Auto Complete
 #----------------------------------------------------------------------
-autoload -Uz compinit
-typeset -i updated_at=$(date +'%j' -r ~/.zcompdump 2>/dev/null || stat -f '%Sm' -t '%j' ~/.zcompdump 2>/dev/null)
-if [ $(date +'%j') != $updated_at ]; then
-  compinit -i
-else
-  compinit -C -i
-fi
+source $ZDOTDIR/completion.zsh
 
-zmodload -i zsh/complist
-
-setopt auto_list
-setopt auto_menu
-setopt always_to_end
-zstyle ':completion:*' menu select
-zstyle ':completion:*' group-name ''
-zstyle ':completion:::::' completer _expand _complete _ignored _approximate
-
-# Carapace.sh
-export CARAPACE_BRIDGES='zsh,fish,bash,inshellisense' # optional
-zstyle ':completion:*' format $'\e[2;37mCompleting %d\e[m'
-source <(carapace _carapace)
 
 #----------------------------------------------------------------------
 # History
 #----------------------------------------------------------------------
 
 # HISTORY
-HISTFILE=$HOME/.zsh_history
+HISTFILE="$ZDOTDIR/.zsh_history"
 HISTSIZE=1000
 SAVEHIST=1000
 setopt hist_ignore_all_dups
@@ -90,39 +79,18 @@ bindkey '^[[B' history-substring-search-down
 
 
 #----------------------------------------------------------------------
-# Load Starship
+# Load
 #----------------------------------------------------------------------
 
+# Load Starship
 eval "$(starship init zsh)"
-
 echo "$(cat $HOME/.config/zsh/banner)" | lolcat
 
-
-#----------------------------------------------------------------------
-# Load Zoxide
-#----------------------------------------------------------------------
-
-eval "$(zoxide init zsh)"
-
-#----------------------------------------------------------------------
-# Load Node Version Manager
-#----------------------------------------------------------------------
-
-export NVM_DIR="$HOME/.config/nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-
-#----------------------------------------------------------------------
-# Load Python Version Manager
-#----------------------------------------------------------------------
-
+# Load Pyenv
 export PYENV_ROOT="$HOME/.pyenv"
 [[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
 eval "$(pyenv init - zsh)"
-=======
-fpath+=~/.zfunc; autoload -Uz compinit; compinit
 
-. "$HOME/.local/share/../bin/env"
-
-# Generated for envman. Do not edit.
-[ -s "$HOME/.config/envman/load.sh" ] && source "$HOME/.config/envman/load.sh"
+# Load NVM
+export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" --no-use # This loads nvm, without auto-using the default version
