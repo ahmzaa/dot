@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+# Tell --mangoapp which MangoHud.conf to use
+export MANGOHUD_CONFIGFILE=/home/ahmza/.config/MangoHud/MangoHud.conf
+
+# Set up your gamescope display settings
+GSC_CMD="/usr/bin/gamescope \
+    -W 3440
+		-H 1440
+    -r 99.98200 \
+    -e \
+    --backend drm \
+    --immediate-flips \
+    --adaptive-sync \
+    --mangoapp \
+    --
+    "
+
+# Start Steam in Big Picture Mode
+/usr/bin/gamescope -W 3440 -H 1440 -r 99.98200 -O DP-2 --mangoapp -- /usr/bin/steam -tenfoot

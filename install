@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -19,8 +19,8 @@ select yn in "Yes" "No"; do
 done
 
 sudo /bin/bash <<EOF
-    apt install stow zsh ripgrep lolcat fd-find ninja-build gettext cmake unzip curl build-essential -y
-    curl -sfL git.io/antibody | sh -s - -b /usr/local/bin
+    apt install git stow zsh ripgrep lolcat fd-find ninja-build gettext cmake unzip curl build-essential -y
+    git clone --depth=1 https://github.com/mattmc3/antidote.git ${ZDOTDIR:-$HOME}/.antidote
     curl -sS https://starship.rs/install.sh | sh -s -- -y
 EOF
 
@@ -51,8 +51,6 @@ stow zsh
 stow nvim
 stow starship
 
-
-antibody bundle < ~/.config/zsh/plugins > ~/.zsh_plugins
 
 printf "\n${GREEN}Would you like to change your shell to zsh now?${NC}\n"
 
