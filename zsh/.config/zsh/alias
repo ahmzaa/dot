@@ -9,15 +9,13 @@ alias vim='nvim'
 
 alias sudo='sudo ' # expands aliases
 
-alias ls='ls -1 --color'
-alias ll='ls -lh --color'
-alias la='ls -alh --color'
+alias ls='lsd -1 --icon=never'
+alias ll='lsd -lh --icon=never'
+alias la='lsd -alh --icon=never'
 
-alias lsd='lsd -1'
-alias lsdl='lsd -lh'
-alias lsda='lsd -alh'
+alias grep='rg'
 
-alias grep='grep --color'
+alias find='fd'
 
 
 #----------------------------------------------------------------------
