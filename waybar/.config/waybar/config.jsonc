@@ -1,0 +1,170 @@
+{
+  "layer": "top",
+  "position": "top",
+  "exclusive": true,
+  "passthrough": false,
+  "gtk-layer-shell": true,
+
+  /* === Modules Order === */
+  "modules-left": [
+    "clock",
+    "cpu",
+    "memory",
+    "disk",
+    "temperature"
+  ],
+  "modules-center": [
+    "hyprland/workspaces"
+  ],
+  "modules-right": [
+    "tray",
+    "idle_inhibitor",
+    "pulseaudio",
+    "network",
+    "battery",
+    "battery#2"
+  ],
+  /* === Modules Left === */
+  "clock": {
+    "timezones": [
+      "Europe/London",
+      "Etc/UTC",
+      "Asia/Seoul"
+    ],
+    "format": "{:%I:%M %d-%m-%Y %Z}",
+    "tooltip-format": "{tz_list}<tt><small>{calendar}</small></tt>",
+    "calendar": {
+      "mode": "month",
+      "mode-mon-col": 3,
+      "weeks-pos": "right",
+      "on-scroll": 1,
+      "format": {
+        "months": "<span color='#ffead3'><b>{}</b></span>",
+        "days": "<span color='#ecc6d9'><b>{}</b></span>",
+        "weeks": "<span color='#99ffdd'><b>W{}</b></span>",
+        "weekdays": "<span color='#ffcc66'><b>{}</b></span>",
+        "today": "<span color='#ff6699'><b><u>{}</u></b></span>"
+      }
+    },
+    "actions":  {
+      "on-click-right": "mode",
+      "on-scroll-up": "tz_up",
+      "on-scroll-down": "tz_down",
+    },
+  },
+  "cpu": {
+    "format": "{usage}% ",
+    "tooltip": true,
+    "tooltip-format": "CPU Usage: {usage}%\nCores: {cores}",
+    "states": {
+      "warning": 60,
+      "critical": 80
+    }
+  },
+  "memory": {
+    "format": "{}% 󰍛",
+    "tooltip": true,
+    "tooltip-format": "RAM Usage: {used} GB / {total} GB ({percentage}%)",
+    "states": {
+      "warning": 60,
+      "critical": 80
+    }
+  },
+  "disk": {
+    "format": "{percentage_free}% ",
+    "tooltip": true,
+    "tooltip-format": "Free Space: {free} / {total} ({percentage_free}%)",
+    "states": {
+      "warning": 70,
+      "critical": 90
+    }
+  },
+  "temperature": {
+    "format": "{temperatureC}°C {icon}",
+    "tooltip": true,
+    "tooltip-format": "Temperature: {temperatureC}°C",
+    "warning-threshold": 60,
+    "critical-threshold": 80,
+    "format-icons": [
+      ""
+    ]
+  },
+  /* === Modules Center === */
+  "hyprland/workspaces": {
+    "format": "{icon}",
+    "format-icons": {
+      "1": "",
+      "2": "",
+      "3": "",
+      "4": "",
+      "8": "󰍥",
+      "9": "",
+      "urgent": "",
+      "active": "",
+    },
+    "sort-by-number": true,
+    "disable-scroll": true,
+    "all-outputs": true,
+    "show-special": true
+  },
+  /* === Modules Right === */
+  "tray":{
+    "icon-size": 18,
+    "spacing": 10,
+  },
+  "idle_inhibitor": {
+    "format": "{icon}",
+    "format-icons": {
+      "activated": "",
+      "deactivated": ""
+    }
+  },
+  "pulseaudio": {
+    "format": "{volume}% {icon}",
+    "format-muted": " {format_source}",
+    "format-icons": {
+      "default": [
+        "",
+        ""
+      ]
+    }
+  },
+  "network": {
+    "format": "{ifname}",
+    "format-wifi": "{essid} ({signalStrength}%)  ",
+    "format-ethernet": "{ifname} 󰈀",
+    "format-disconnected": " ",
+    "tooltip-format": " {ifname} via {gwaddr}",
+    "tooltip-format-wifi": "Interface: {ifname}\nIP Address: {ipaddr}/{cidr}\nGateway: {gwaddr}\nFrequency: {frequency} GHz",
+    "tooltip-format-ethernet": " {ifname} {ipaddr}/{cidr}",
+    "tooltip-format-disconnected": "Disconnected",
+    "max-length": 50,
+    "on-click": "nm-connection-editor"
+  },
+  "battery": {
+    "bat": "BAT0",
+    "format": "{capacity}% {icon}",
+    "format-charging": "{capacity}% 󰂄",
+    "format-plugged": "{capacity}% ",
+    "format-icons": ["", "", "", "", ""],
+    "weighted-average": true,
+    "tooltip-format": "{timeTo} \nPower Draw: {power}w",
+    "states": {
+      "warning": 30,
+      "critical": 15
+    }
+  },
+  "battery#2": {
+    "bat": "BAT1",
+    "format": "{capacity}% {icon}",
+    "format-charging": "{capacity}% 󰂄",
+    "format-plugged": "{capacity}% ",
+    "format-icons": ["", "", "", "", ""],
+    "weighted-average": true,
+    "tooltip-format": "{timeTo} \nPower Draw: {power}w",
+    "states": {
+      "warning": 30,
+      "critical": 15
+    }
+  },
+}
