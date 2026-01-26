@@ -47,7 +47,10 @@ local plugins = {
 			{ "j-hui/fidget.nvim", opts = {} },
 
 			-- Allows extra capabilities provided by blink.cmp
-			"saghen/blink.cmp",
+			{
+				"saghen/blink.cmp",
+				build = "cargo build --release",
+			},
 		},
 	},
 	{
