@@ -31,7 +31,7 @@
       "Etc/UTC",
       "Asia/Seoul"
     ],
-    "format": "{:%I:%M %d-%m-%Y %Z}",
+    "format": "{:%H:%M %d-%m-%Y %Z}",
     "tooltip-format": "{tz_list}<tt><small>{calendar}</small></tt>",
     "calendar": {
       "mode": "month",
@@ -83,6 +83,7 @@
     "format": "{temperatureC}°C {icon}",
     "tooltip": true,
     "tooltip-format": "Temperature: {temperatureC}°C",
+    "hwmon-path": "/sys/class/hwmon/hwmon2/temp1_input",
     "warning-threshold": 60,
     "critical-threshold": 80,
     "format-icons": [
@@ -127,7 +128,8 @@
         "",
         ""
       ]
-    }
+    },
+    "on-click": "pavucontrol"
   },
   "network": {
     "format": "{ifname}",
