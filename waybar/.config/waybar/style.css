@@ -1,112 +1,200 @@
 @import "mocha.css";
 
-/* Global */
+/* -- Global rules -- */
 * {
-  font-family: "JetBrainsMono Nerd Font";
-  font-weight: bold;
-  font-size: .9rem;
-  border-radius: 1rem;
-  transition-property: background-color;
-  transition-duration: 0.5s;
-  background-color: shade(@base, 0.9);
+  border: none;
+  font-family: "JetbrainsMono Nerd Font";
+  font-size: 16px;
+  min-height: 0px;
 }
 
-@keyframes blink_red {
-  to {
-    background-color: @red;
-    color: @base;
-  }
-}
-
-.warning, .critical, .urgent {
-  animation-name: blink_red;
-  animation-duration: 1s;
-  animation-timing-function: linear;
-  animation-iteration-count: infinite;
-  animation-direction: alternate;
-}
-
-#clock, #battery, #network, #pulseaudio, #wireplumber, #tray, #idle_inhibitor, #mpd {
-  padding: .6rem;
-}
-
-/* Bar */
-window#waybar {
+#waybar {
   background: transparent;
+  color: @text;
 }
 
-window > box {
-  background-color: transparent;
-  margin: 0.3rem;
-  margin-bottom: 0;
+/* - Genera rules for visible modules -- */
+#custom-archicon,
+#clock,
+#cpu,
+#memory,
+#disk,
+#temperature,
+#idle_inhibitor,
+#pulseaudio,
+#pulseaudio-slider,
+#network,
+#language,
+#battery {
+  background-color: @surface0;
+  margin-top: 6px;
+  margin-bottom: 6px;
+  padding-left: 10px;
+  padding-right: 10px;
+  transition: none;
 }
 
-/* Workspaces */
-/* https://github.com/Alexays/Waybar/wiki/FAQ#the-workspace-buttons-have-a-strange-hover-effect */
-#workspaces:hover {
-  background-color: @green;
+/* Separation to the left */
+#clock,
+#cpu,
+#idle_inhibitor {
+  margin-left: 5px;
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+}
+
+/* Separation to the right */
+#clock,
+#temperature,
+#language,
+#battery.2 {
+  margin-right: 5px;
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+/* -- Specific styles -- */
+
+/* Modules left */
+#clock {
+  background: @surface0;
+}
+
+#cpu {
+  background: @surface0;
+}
+
+#cpu.warning {
+  color: @peach;
+}
+
+#cpu.critical {
+  color: @red;
+}
+
+#memory {
+  background: @surface0;
+}
+
+#memory.warning {
+  color: @peach;
+}
+
+#memory.critical {
+  color: @red;
+}
+
+#disk {
+  background: @surface0;
+}
+
+#disk.warning {
+  color: @peach;
+}
+
+#disk.critical {
+  color: @red;
+}
+
+#temperature {
+  background: @surface0;
+}
+
+#temperature.warning {
+  color: @peach;
+}
+
+#temperature.critical {
+  color: @red;
+}
+
+/* Modules center */
+#workspaces {
+  background: @surface0;
+  border-radius: 10px;
+  margin: 6px 5px;
+  padding: 0px 6px;
 }
 
 #workspaces button {
-  padding: .4rem .4rem;
-  color: @red;
+  color: @lavender;
   background: transparent;
+  padding: 4px 4px;
+  transition: color 0.3s ease, text-shadow 0.3s ease, transform 0.3s ease;
 }
 
-#workspaces button.focused {
-  color: @blue;
+#workspaces button.occupied {
+  color: #A6E3A1;
 }
 
+#workspaces button.active {
+  color: @sky;
+  text-shadow: 0 0 4px #ABE9B3;
+}
 
 #workspaces button:hover {
-  color: @rosewater;
+  color: @sapphire;
 }
 
-/* Tooltip */
-tooltip {
-  background-color: @base;
+#workspaces button.active:hover {}
+
+/* Modules right */
+#tray {
+  background: @surface0;
+  border-radius: 10px;
+  padding: 0px 5px;
+  margin: 6px 5px;
 }
 
-tooltip label {
-  color: @rosewater;
+#tray button {
+  padding: 0px 5px;
+  margin: 0px 3px;
+  border-radius: 6px;
+  transition: background 0.3s ease;
 }
 
-/* battery */
+#idle_inhibitor {
+  background: @surface0;
+  padding-right: 15px;
+}
+
+#pulseaudio {
+  color: @maroon;
+  min-width: 55px;
+  background: @surface0;
+}
+
+#network {
+  background: @surface0;
+  padding-right: 13px;
+}
+
 #battery {
-  color: @mauve;
+  color: @green;
+  background: @surface0;
+  padding-right: 10px;
 }
-#battery.full {
+
+#battery.charging {
   color: @green;
 }
-#battery.charging{
-  color: @teal;
-}
-#battery.discharging {
+
+#battery.warning:not(.charging) {
   color: @peach;
+
 }
 #battery.critical:not(.charging) {
-  color: @pink;
-}
-#custom-powermenu {
   color: @red;
 }
 
-/* extra */
-#clock {
-  color: @rosewater;
+#battery.2 {
+  padding-right: 20px;
 }
-#idle_inhibitor {
-  color: @foreground;
-}
-#idle_inhibitor.activated {
-  color: @green;
-}
-#pulseaudio {
-  color: @mauve;
-}
-#network {
-  color: @pink;
-}
-#network.disconnected {
-  color: @foreground;
+
+/* === Optional animation === */
+@keyframes blink {
+  to {
+    background-color: @red;
+    color: @surface0;
+  }
 }

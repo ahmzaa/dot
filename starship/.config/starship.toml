@@ -19,9 +19,13 @@ style = 'mauve'
 format = '[$symbol$branch(:$remote_branch)]($style) '
 
 [golang]
-symbol = ' '
+symbol = '🐹 '
 style = 'teal'
 format = '[$symbol$version]($style) '
+
+[docker_context]
+symbol = '🐳 '
+format = 'via [🐋 $context](blue bold)'
 
 [kubernetes]
 symbol = '⚙️ '

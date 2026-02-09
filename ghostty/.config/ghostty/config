@@ -1,0 +1,8 @@
+theme = Catppuccin Mocha
+font-size = 14
+font-family = "JetBrainsMono Nerd Font"
+shell-integration-features = sudo
+window-padding-x = 10
+window-padding-y = 10
+background-opacity = 0.9
+window-decoration = none

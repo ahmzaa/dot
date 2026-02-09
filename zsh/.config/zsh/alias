@@ -9,11 +9,13 @@ alias vim='nvim'
 
 alias sudo='sudo ' # expands aliases
 
-alias ls='ls -1 --color'
-alias ll='ls -lh --color'
-alias la='ls -alh --color'
+alias ls='lsd -1 --icon=never'
+alias ll='lsd -lh --icon=never'
+alias la='lsd -alh --icon=never'
 
-alias grep='grep --color'
+alias grep='rg'
+
+alias find='fd'
 
 
 #----------------------------------------------------------------------
@@ -39,10 +41,14 @@ alias dc="docker-compose"
 alias dcu="docker-compose up -d"
 alias dcd="docker-compose down"
 
-
 #----------------------------------------------------------------------
-# Kitty
+# yazi
 #----------------------------------------------------------------------
 
-alias s="kitten ssh"
-alias icat="kitten icat"
+function y() {
+	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
+	yazi "$@" --cwd-file="$tmp"
+	IFS= read -r -d '' cwd < "$tmp"
+	[ -n "$cwd" ] && [ "$cwd" != "$PWD" ] && builtin cd -- "$cwd"
+	rm -f -- "$tmp"
+}

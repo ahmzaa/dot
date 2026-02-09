@@ -2,11 +2,10 @@ zsh-users/zsh-completions
 
 djui/alias-tips
 
-zsh-users/zsh-syntax-highlighting
-zsh-users/zsh-history-substring-search
-zsh-users/zsh-autosuggestions
+zsh-users/zsh-syntax-highlighting kind:defer
+zsh-users/zsh-history-substring-search kind:defer
+zsh-users/zsh-autosuggestions kind:defer
 
-#spaceship-prompt/spaceship-prompt
+#Aloxaf/fzf-tab
 
-
-#antibody bundle < ~/.zsh_plugins > ~/.zsh_plugins.sh
+# antibody bundle < ~/.zsh_plugins > ~/.zsh_plugins.sh
