@@ -1,0 +1,112 @@
+#!/usr/bin/env bash
+
+#Aliases - General Use
+alias gcrt='gcert -s --prodssh -m hwops; /google/bin/releases/miba-team/public/miba_ssh_session -m hwops -p -- echo Local certs created'
+alias src='source'
+alias p='pwd'
+alias c='clear'
+alias check='cat .bash_aliases | grep'
+ 
+#Aliases - RRI Commands
+alias reinstall='rri --reinstall'
+alias bootwait='rri --reinstall --request_type bootwait'
+alias netboot='rri --reinstall --request_type=recovery_netboot_image'
+alias status='rri --status'
+alias monitor='rri --status --live --sort --top --top_interval 5'
+alias hist='rri --history'
+alias cancel='rri --cancel'
+alias taillog='rri --taillog'
+alias grablog='rri --grablog'
+alias loas2='rri --reinstall --request_type=bootwait --i2params=init_script=force_tftp'
+alias ezinstall='/google/src/head/depot/google3/experimental/users/nernst/ezseries/ezinstall.sh'
+ 
+#Aliases - Networking
+alias jlink='/google/data/ro/projects/toolshed/jlink2 -c=true -o=true -s=true -l=true -f=false'
+alias cableaudit='chemia --prompt=false cableaudit --entities'
+alias linkqual='chemia --prompt=false linkqualification --quick=true --entities'
+alias dping='/google/bin/releases/miba-team/public/miba_ssh_session -a -- /google/bin/releases/hwops-toolshed/incubator/dping2/dping2'
+alias msp='/google/bin/releases/hwops-toolshed/incubator/msp/msp'
+alias bounce='bn'
+alias torup='/google/bin/releases/hwops-toolshed/incubator/torup/torup'
+alias warmboot='chemia --prompt=false warmreboot --entities'
+alias stoat='/google/bin/releases/hwops-toolshed/jlink/jlink -stoat'
+alias tcli='/google/bin/releases/netinfra-telemetry/tcli/tcli.par'
+alias eznet='/google/src/head/depot/google3/experimental/users/nernst/ezseries/eznet.sh'
+ 
+#Aliases - Linkqual
+alias smodel='/google/data/ro/teams/mlsc/superpod/cli/prod/model_cli --action=link_info'
+alias qretro='/google/data/ro/teams/mlsc/superpod/cli/prod/cli linkqual retro'
+alias qloop='/google/data/ro/teams/mlsc/superpod/cli/prod/cli linkqual lb'
+alias qcopper='/google/data/ro/teams/mlsc/superpod/cli/prod/cli linkqual m2m'
+alias qloss='/google/data/ro/teams/mlsc/superpod/cli/prod/cli lq lds-returnloss'
+alias qrxtx='/google/data/ro/teams/mlsc/superpod/cli/prod/cli lq lds-tx-rx'
+alias qfull='/google/data/ro/teams/mlsc/superpod/cli/prod/cli linkqual fulloptical'
+alias vfcp='vf_cp'
+alias ezlink='/google/src/head/depot/google3/experimental/users/nernst/ezseries/ezlink.sh'
+
+#Aliases - Machines
+alias mdsanity='/google/data/ro/projects/machine-doctor/md_client'
+alias story='/google/bin/releases/hwops-toolshed/incubator/story/story --timeout=600'
+alias mldc='/google/bin/releases/hwops-toolshed/incubator/ml_deep_check/ml_deep_check'
+alias nodecli='/google/bin/releases/hwops-toolshed/incubator/rri_nodes/rri_nodes.par'
+alias hwconfig='/google/data/ro/teams/hw-configs/list_devpaths_and_gpn_in_hw_config.sh'
+alias mega='megapede connect'
+alias post='/google/data/ro/projects/syshealth/syshealth_list_info --variables=nemora-event'
+alias yogi='/google/bin/releases/yogi/cli'
+alias ping_nodes='_ping_nodes'
+alias nodeinfo='/google/bin/releases/msv-eng/clis/ne/node_entities_cli lookup'
+alias prod='prdcs find'
+alias prodh='prdcs --mask=state history'
+
+#Aliases - Administrative
+alias notnow='/google/data/ro/teams/datacenter-notnow/notnow'
+alias setmac='prdcs setmacaddress'
+alias psis_check='psis_cli list_problems -dms'
+#alias acmporter='/google/data/ro/projects/toolshed/acmporter --breadboard_numbers='
+alias acmporter='/google/bin/releases/hwops-toolshed/acmporter/acmporter --breadboard_numbers='
+
+#Hydra
+alias ipdb_client='/google/data/ro/projects/netops/ipdb_client'
+alias cli='/google/data/ro/teams/network-sre/cli.par'
+alias tcli='/google/bin/releases/netinfra-telemetry/tcli/tcli.par'
+
+alias megapede_config_dev="megapede_config --megapede_config_address=blade:ops_hardware_hydra.config.megapedeconfigstore-dev"
+
+#port bounce function
+bn () {
+    chemia -prompt=false setadminstate -state=down -entities=$1
+    sleep 5s
+    chemia -prompt=false setadminstate -state=up -entities=$1
+}
+
+#ping nodes function
+alias ping_nodes='_ping_nodes'
+_ping_nodes(){
+  all_nodes=$(/google/bin/releases/msv-eng/clis/ne/node_entities_cli lookup $1 | grep Hostname)
+  filtered_nodes=()
+  for node in ${all_nodes[@]}
+  do
+    tmp=${node#*:}
+    if [ ! -z "$tmp" -a "$tmp" != " " ]
+    then
+      filtered_nodes+=($tmp)
+    fi
+  done
+  mcp shared -- fping6 ${filtered_nodes[@]}
+}
+
+#vfcopper function
+alias vfcp='vf_cp'
+function vf_cp(){
+host=${1%%:*}
+port=${1%%-*}
+port2=${1##*-}
+host2=${port2%%:*}
+    /google/data/ro/teams/mlsc/superpod/cli/prod/cli linkqual mach-to-mach $host #port "${@:2}"
+wait
+    /google/data/ro/teams/mlsc/superpod/cli/prod/cli linkqual mach-to-mach $host2 #port2 "${@:2}"
+}
+
+alias psis_cli='/google/bin/releases/psis/cli/psis_cli'
+
+alias witchdoc='/google/bin/releases/hwops-toolshed/witchdoctor/witchdoctor'
