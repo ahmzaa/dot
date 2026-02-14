@@ -1,0 +1,20 @@
+# Check if the cert expires in less than 3600 seconds (1 hour)
+# Extract the ISO date string
+EXPIRY_STR=$(ssh-keygen -Lf ~/.ssh/id_ed25519_sk-cert.pub | grep "Valid:" | awk '{print $5}')
+# Convert that string into a Unix timestamp (works on macOS and Linux)
+EXPIRY=$(date -j -f "%Y-%m-%dT%H:%M:%S" "$EXPIRY_STR" "+%s" 2>/dev/null || date -d "$EXPIRY_STR" "+%s")
+CURRENT_TIME=$(date +%s)
+
+if [ "$((EXPIRY - CURRENT_TIME))" -lt 3600 ]; then
+    echo "Certificate expiring soon, renewing..."
+    echo "Sending public key to CA..."
+    scp ~/.ssh/id_ed25519_sk.pub 10.10.100.13:/tmp/
+    echo "CA to sign the key..."
+    ssh 10.10.100.13 "./sign-key /tmp/id_ed25519_sk.pub ahmza"
+    echo "Download the signed certificate..."
+    scp 10.10.100.13:/tmp/id_ed25519_sk-cert.pub ~/.ssh/
+    echo ""
+    echo "All Done !!"
+fi
+
+echo "Certificate does not require renewal ..."
