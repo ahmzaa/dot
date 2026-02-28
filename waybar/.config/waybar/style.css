@@ -10,7 +10,7 @@
 
 #waybar {
   background: transparent;
-  color: @text;
+  color: @foreground;
 }
 
 /* - Genera rules for visible modules -- */
@@ -26,7 +26,7 @@
 #network,
 #language,
 #battery {
-  background-color: @surface0;
+  background-color: @background;
   margin-top: 6px;
   margin-bottom: 6px;
   padding-left: 10px;
@@ -57,90 +57,90 @@
 
 /* Modules left */
 #clock {
-  background: @surface0;
+  background: @background;
 }
 
 #cpu {
-  background: @surface0;
+  background: @background;
 }
 
 #cpu.warning {
-  color: @peach;
+  color: #E09866;
 }
 
 #cpu.critical {
-  color: @red;
+  color: #D47D72;
 }
 
 #memory {
-  background: @surface0;
+  background: @background;
 }
 
 #memory.warning {
-  color: @peach;
+  color: #E09866;
 }
 
 #memory.critical {
-  color: @red;
+  color: #D47D72;
 }
 
 #disk {
-  background: @surface0;
+  background: @background;
 }
 
 #disk.warning {
-  color: @peach;
+  color: #E09866;
 }
 
 #disk.critical {
-  color: @red;
+  color: #D47D72;
 }
 
 #temperature {
-  background: @surface0;
+  background: @background;
 }
 
 #temperature.warning {
-  color: @peach;
+  color: #E09866;
 }
 
 #temperature.critical {
-  color: @red;
+  color: #D47D72;
 }
 
 /* Modules center */
 #workspaces {
-  background: @surface0;
+  background: @background;
   border-radius: 10px;
   margin: 6px 5px;
   padding: 0px 6px;
 }
 
 #workspaces button {
-  color: @lavender;
+  color: @color5;
   background: transparent;
   padding: 4px 4px;
   transition: color 0.3s ease, text-shadow 0.3s ease, transform 0.3s ease;
 }
 
 #workspaces button.occupied {
-  color: #A6E3A1;
+  color: @color15;
 }
 
 #workspaces button.active {
-  color: @sky;
+  color: @color14;
   text-shadow: 0 0 4px #ABE9B3;
 }
 
 #workspaces button:hover {
-  color: @sapphire;
+  color: @color14;
 }
 
 #workspaces button.active:hover {}
 
 /* Modules right */
 #tray {
-  background: @surface0;
+  background: @background;
   border-radius: 10px;
   padding: 0px 5px;
   margin: 6px 5px;
@@ -154,37 +154,37 @@
 }
 
 #idle_inhibitor {
-  background: @surface0;
+  background: @background;
   padding-right: 15px;
 }
 
 #pulseaudio {
-  color: @maroon;
+  color: @color14;
   min-width: 55px;
-  background: @surface0;
+  background: @background;
 }
 
 #network {
-  background: @surface0;
+  background: @background;
   padding-right: 13px;
 }
 
 #battery {
-  color: @green;
-  background: @surface0;
+  color: #92AF8A;
+  background: @background;
   padding-right: 10px;
 }
 
 #battery.charging {
-  color: @green;
+  color: #92AF8A;
 }
 
 #battery.warning:not(.charging) {
-  color: @peach;
+  color: #E09866;
 
 }
 #battery.critical:not(.charging) {
-  color: @red;
+  color: #D47D72;
 }
 
 #battery.2 {
