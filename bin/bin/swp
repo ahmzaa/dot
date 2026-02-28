@@ -13,7 +13,7 @@ then
     exit 1
   fi
 
-  wal -i "$WALLPP" -n
+  wal -i "$WALLPP" -n --cols16 dual
 
   hyprctl hyprpaper preload "$WALLPP"
   for i in $monitors; do
@@ -29,7 +29,7 @@ else
   fi
 
   echo "Generating Colourscheme"
-  wal -i $WALLPP -n
+  wal -i $WALLPP -n --cols16 dual
 
   echo $WALLPP > $HOME/.cache/wallpp
 
@@ -38,7 +38,6 @@ else
   echo $MONITORS
 
   for i in $MONITORS; do
-    echo "setwpp"
     hyprctl hyprpaper wallpaper "$i, $WALLPP";
   done;
 fi
