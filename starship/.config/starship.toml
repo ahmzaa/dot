@@ -1,7 +1,12 @@
 add_newline = false
 palette = 'catppuccin_mocha'
-format = '$directory$character'
+format = '$time$directory$character'
 right_format = '$all'
+
+[time]
+disabled = false
+format = '[$time]($style) '
+time_format = '%R'
 
 [hostname]
 ssh_only = true

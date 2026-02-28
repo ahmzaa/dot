@@ -5,10 +5,10 @@ NAME=`uname -n`
 
 if [ $OS = "Darwin" ]; then
     echo "device is MacOS"
-    source ~/.config/zsh/mac
+    source ~/.config/zsh/hosts/mac
 fi
 
 if [ $NAME = "shadow" ]; then
     echo "device is Shadow"
-    source ~/.config/zsh/shadow
+    source ~/.config/zsh/hosts/shadow
 fi

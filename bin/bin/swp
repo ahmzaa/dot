@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+
+MONITORS=`hyprctl monitors | grep Monitor | awk '{print $2}'`
+
+if [ -z "$1" ];
+then
+  echo "No image provided, Restoring from cache ..."
+  WALLPP=$(cat "$HOME/.cache/wallpp")
+  echo $WALLPP
+
+  if [ -z "$WALLPP" ]; then
+    echo "Cache is empty. Please provide an image path"
+    exit 1
+  fi
+
+  wal -i "$WALLPP" -n
+
+  hyprctl hyprpaper preload "$WALLPP"
+  for i in $monitors; do
+    hyprctl hyprpaper wallpaper "$i, $WALLPP";
+  done;
+else
+  WALLPP=$(realpath "$1")
+  echo $WALLPP
+
+  if [ ! -f "$WALLPP" ]; then
+    echo "Error: File $WALLPP does not exist"
+    exit 1
+  fi
+
+  echo "Generating Colourscheme"
+  wal -i $WALLPP -n
+
+  echo $WALLPP > $HOME/.cache/wallpp
+
+  sed -i "s|path = .*|path = $WALLPP|" "$HOME/.config/hypr/hyprpaper.conf"
+
+  echo $MONITORS
+
+  for i in $MONITORS; do
+    echo "setwpp"
+    hyprctl hyprpaper wallpaper "$i, $WALLPP";
+  done;
+fi
