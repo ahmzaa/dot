@@ -120,15 +120,9 @@ echo "$(cat $HOME/.config/zsh/banner)" | lolcat
 
 #. "$HOME/.local/share/../bin/env"
 
-# SSH AGENT
-source "$ZDOTDIR/ssh-agent"
-ssh-cert
 
 # Generated for envman. Do not edit.
 #[ -s "$HOME/.config/envman/load.sh" ] && source "$HOME/.config/envman/load.sh"
-
-# Load Pywal Colours
-(cat ~/.cache/wal/sequences &)
 
 
 #----------------------------------------------------------------------
@@ -151,18 +145,39 @@ bindkey '^f' openfff
 #----------------------------------------------------------------------
 # PLUGINS
 #----------------------------------------------------------------------
+
+# Check if the plugin Dir exists
+if [ ! -d "$HOME/.zsh/plugins" ]; then
+  mkdir -p $HOME/.zsh/plugins
+fi
+
 # autosuggestions
 # requires zsh-autosuggestions
-source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+if [ -f "$HOME/.zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh" ]; then
+  source $HOME/.zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+else
+  git clone https://github.com/zsh-users/zsh-autosuggestions $HOME/.zsh/plugins/zsh-autosuggestions
+fi
 
 # syntax highlighting
 # requires zsh-syntax-highlighting package
-source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+if [ -f "$HOME/.zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]; then
+  source $HOME/.zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+else
+  git clone https://github.com/zsh-users/zsh-syntax-highlighting.git $HOME/.zsh/plugins/zsh-syntax-highlighting
+fi
 
 # zsh-completions
 # requires https://github.com/zsh-users/zsh-completions
-source /usr/share/zsh/plugins/zsh-completions/zsh-completions.plugin.zsh
-
+if [ -f "$HOME/.zsh/plugins/zsh-completions/zsh-completions.plugin.zsh" ]; then
+  source $HOME/.zsh/plugins/zsh-completions/zsh-completions.plugin.zsh
+else
+  git clone https://github.com/zsh-users/zsh-completions.git $HOME/.zsh/plugins/zsh-completions
+fi
 # fzf-tab
 # requires https://github.com/Aloxaf/fzf-tab
-source /usr/share/zsh/plugins/fzf-tab/fzf-tab.plugin.zsh
+if [ -f "$HOME/.zsh/plugins/fzf-tab/fzf-tab.plugin.zsh" ]; then
+  source $HOME/.zsh/plugins/fzf-tab/fzf-tab.plugin.zsh
+else
+  git clone https://github.com/Aloxaf/fzf-tab $HOME/.zsh/plugins/fzf-tab
+fi
