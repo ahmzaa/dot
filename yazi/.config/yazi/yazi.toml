@@ -1,0 +1,11 @@
+[mgr]
+show_hidden = true
+
+[[opener.set-wallpaper]]
+run  = "swp %s1"
+for  = "linux"
+desc = "Set as wallpaper"
+
+[[open.prepend_rules]]
+mime = "image/*"
+use  = [ "open", "reveal", "show-exif", "set-wallpaper" ]

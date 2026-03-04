@@ -1,0 +1,13 @@
+# keymap.toml
+[[mgr.prepend_keymap]]
+on   = [ "<C-w>", "a" ]
+for  = "linux"
+run  = "shell -- swp %h"
+desc = "Set hovered file as wallpaper (All Monitors)"
+
+
+[[mgr.prepend_keymap]]
+on   = [ "<C-w>", "s" ]
+for  = "linux"
+run  = "shell --block -- swp %h --select"
+desc = "Set hovered file as wallpaper (Select Monitors)"
