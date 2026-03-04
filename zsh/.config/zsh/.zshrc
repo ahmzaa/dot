@@ -77,10 +77,8 @@ HISTSIZE=100000
 SAVEHIST=100000
 HISTCONTROL=ignoreboth # consecutive duplicates & commands starting with space are not saved
 
-
 ## OTHER
 autoload -U tetris # tetris in zsh !!
-
 
 ## open fff file manager with ctrl f
 openfff() {
@@ -88,41 +86,6 @@ openfff() {
   zle redisplay
 }
 zle -N openfff
-
-
-#----------------------------------------------------------------------
-# Load
-#----------------------------------------------------------------------
-
-# Source Host Specific Settings
-source $ZDOTDIR/os-specific.sh
-
-# Load fzf
-source <(fzf --zsh)
-
-# Load Starship
-eval "$(starship init zsh)"
-echo "$(cat $HOME/.config/zsh/banner)" | lolcat
-
-# Load Pyenv
-#export PYENV_ROOT="$HOME/.pyenv"
-#[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
-#eval "$(pyenv init - zsh)"
-
-# Load NVM
-#export NVM_DIR="$HOME/.config/nvm"
-#[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-#[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-
-#export NVM_DIR="$HOME/.nvm"
-#[ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"  # This loads nvm
-#[ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
-
-#. "$HOME/.local/share/../bin/env"
-
-
-# Generated for envman. Do not edit.
-#[ -s "$HOME/.config/envman/load.sh" ] && source "$HOME/.config/envman/load.sh"
 
 
 #----------------------------------------------------------------------
@@ -181,3 +144,45 @@ if [ -f "$HOME/.zsh/plugins/fzf-tab/fzf-tab.plugin.zsh" ]; then
 else
   git clone https://github.com/Aloxaf/fzf-tab $HOME/.zsh/plugins/fzf-tab
 fi
+
+
+#----------------------------------------------------------------------
+# Load
+#----------------------------------------------------------------------
+
+# Load Pywal Colours
+(cat ~/.cache/wal/sequences &)
+typeset -A ZSH_HIGHLIGHT_STYLES
+ZSH_HIGHLIGHT_STYLES[command]='fg=white,bold'
+ZSH_HIGHLIGHT_STYLES[alias]='fg=white,bold'
+
+# Source Host Specific Settings
+source $ZDOTDIR/os-specific.sh
+
+# Generated for envman. Do not edit.
+[ -s "$HOME/.config/envman/load.sh" ] && source "$HOME/.config/envman/load.sh"
+
+# Load Pyenv
+#export PYENV_ROOT="$HOME/.pyenv"
+#[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
+#eval "$(pyenv init - zsh)"
+
+#export NVM_DIR="$HOME/.nvm"
+#[ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"  # This loads nvm
+#[ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
+
+#. "$HOME/.local/share/../bin/env"
+
+# Generated for envman. Do not edit.
+#[ -s "$HOME/.config/envman/load.sh" ] && source "$HOME/.config/envman/load.sh"
+
+# Load fzf
+source <(fzf --zsh)
+
+# Load Starship
+eval "$(starship init zsh)"
+echo "$(cat $HOME/.config/zsh/banner)" | lolcat # | tte highlight
+
+# SSH AGENT
+source "$ZDOTDIR/ssh-agent"
+#ssh-cert
