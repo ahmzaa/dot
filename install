@@ -218,19 +218,71 @@ install_starship() {
     fi
 }
 
+# Rust target triple for prebuilt-binary downloads (yazi et al.).
+target_triple() {
+    local arch os
+    case "$(uname -m)" in
+        x86_64|amd64) arch="x86_64" ;;
+        arm64|aarch64) arch="aarch64" ;;
+        *) return 1 ;;
+    esac
+    case "$(uname -s)" in
+        Darwin) os="apple-darwin" ;;
+        Linux)  os="unknown-linux-gnu" ;;
+        *) return 1 ;;
+    esac
+    echo "${arch}-${os}"
+}
+
+# Install yazi from the official GitHub prebuilt binary (fast, no toolchain).
+# Assets look like: yazi-<triple>.zip containing `yazi` and `ya`.
+install_yazi_from_github() {
+    local triple url tmp
+    triple="$(target_triple)" || return 1
+    command -v unzip >/dev/null 2>&1 || pkg_install unzip
+    command -v unzip >/dev/null 2>&1 || return 1
+    url="https://github.com/sxyazi/yazi/releases/latest/download/yazi-${triple}.zip"
+    tmp="$(mktemp -d)"
+    info "Downloading yazi prebuilt binary ($triple)..."
+    if curl -fsSL "$url" -o "$tmp/yazi.zip" && unzip -q "$tmp/yazi.zip" -d "$tmp"; then
+        mkdir -p "$HOME/.local/bin"
+        # Binaries live in a subdir named after the asset.
+        find "$tmp" -type f \( -name yazi -o -name ya \) -exec install -m755 {} "$HOME/.local/bin/" \;
+        rm -rf "$tmp"
+        command -v yazi >/dev/null 2>&1 || [[ -x "$HOME/.local/bin/yazi" ]]
+    else
+        rm -rf "$tmp"
+        return 1
+    fi
+}
+
 install_yazi() {
     pkg_install yazi
-    # yazi is not packaged everywhere (e.g. apt) — build with cargo, which
-    # needs a Rust toolchain plus make/gcc. Note: the yazi-fm/yazi-cli crates
-    # must be installed via the 'yazi-build' meta-crate (Cargo limitation).
-    if ! command -v yazi >/dev/null 2>&1; then
-        info "yazi not available via $PM — trying cargo..."
-        if ensure_build_tools && ensure_cargo && cargo install --force yazi-build; then
-            unmark_manual yazi
-        else
-            warn "Could not install yazi automatically."
+    command -v yazi >/dev/null 2>&1 && return 0
+
+    # Not packaged (e.g. apt). Try fastest options first:
+    #   1) official prebuilt GitHub binary (no build)
+    #   2) cargo binstall (prebuilt via cargo)
+    #   3) build from source via the 'yazi-build' meta-crate (Cargo limitation)
+    info "yazi not available via $PM — trying prebuilt binary..."
+    if install_yazi_from_github; then
+        unmark_manual yazi; return 0
+    fi
+
+    if command -v cargo-binstall >/dev/null 2>&1 || \
+       { ensure_cargo && cargo install cargo-binstall >/dev/null 2>&1; }; then
+        info "Installing yazi via cargo binstall..."
+        if cargo binstall -y yazi-fm yazi-cli; then
+            unmark_manual yazi; return 0
         fi
     fi
+
+    info "Falling back to building yazi from source..."
+    if ensure_build_tools && ensure_cargo && cargo install --force yazi-build; then
+        unmark_manual yazi; return 0
+    fi
+
+    warn "Could not install yazi automatically."
 }
 
 #--------------------------------------------------------------------
