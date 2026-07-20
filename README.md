@@ -1,79 +1,83 @@
 # Dotfiles ···
 
-❤️ README is WIP
+Cross-platform (macOS + Linux) dotfiles managed with [GNU Stow](https://www.gnu.org/software/stow/).
 
-Dotfiles to configure zsh, neovim and a few others.
+Each top-level directory is a Stow package whose contents mirror `$HOME`.
 
-**(Basic Setup)** = terminal only configuration, great for headless
+## Packages
 
-**(More than the terminal)** = configs for more than the terminal i.e window manager stuffs
+| Package | Description |
+|---------|-------------|
+| `zsh` | Zsh config, host-specific settings, SSH agent/cert scripts — [README](zsh/.config/zsh/README.md) |
+| `shell` | Shell-agnostic `alias`, `path`, and (gitignored) `vars` |
+| `nvim` | Neovim (lazy.nvim) — [README](nvim/.config/nvim/README.md) |
+| `starship` | [Starship](https://starship.rs) prompt (kubernetes/teleport aware) |
+| `tmux` | tmux config + `tmux-sessionizer` |
+| `ghostty` / `foot` | Terminal emulators (macOS / Linux) |
+| `aerospace` | [AeroSpace](https://github.com/nikitabobko/AeroSpace) tiling WM (macOS) |
+| `hypr` | [Hyprland](https://github.com/hyprwm/Hyprland) compositor (Linux) |
+| `waybar` / `dunst` / `tofi` / `wal` | Wayland bar, notifications, launcher, pywal (Linux) |
+| `yazi` | [Yazi](https://github.com/sxyazi/yazi) file manager |
+| `rmpc` | Music player client |
+| `opencode` | [opencode](https://opencode.ai) agents & config |
+| `ssh` | Managed `~/.ssh/config` (agent/keychain + CA host) |
+| `bin` | Assorted helper scripts |
+| `xdg-dirs` | XDG user directory config |
+| `MangoHud` | Gaming HUD (Linux) |
 
-## Features
+## Requirements
 
-- ZSH [README](zsh/.config/zsh/README.md) (Basic Setup)
-- Neovim [README](nvim/.config/nvim/README.md) (Basic Setup)
-- Hyprland [README](hypr/.config/hypr/README.md) (More than the terminal)
-- Kitty [README](kitty/.config/kitty/README.md) (More than the terminal)
-- Rofi [README](rofi/.config/rofi/README.md) (More than the terminal)
-- Waybar [README](waybar/.config/waybar/README.md) (More than the terminal)
+**Essential**
+- [GNU Stow](https://www.gnu.org/software/stow/)
+- [zsh](https://www.zsh.org/)
 
+**Common CLI tools**
+- [starship](https://starship.rs), [fzf](https://github.com/junegunn/fzf), [ripgrep](https://github.com/BurntSushi/ripgrep), [fd](https://github.com/sharkdp/fd)
+- [lsd](https://github.com/lsd-rs/lsd), [lolcat](https://github.com/busyloop/lolcat), [yazi](https://github.com/sxyazi/yazi)
+- [neovim](https://github.com/neovim/neovim) (uses [lazy.nvim](https://github.com/folke/lazy.nvim))
 
-## Install Instructions
+Zsh plugins are cloned automatically on first shell start into `~/.zsh/plugins`
+(zsh-autosuggestions, zsh-syntax-highlighting, zsh-completions, fzf-tab).
 
-<details>
-<summary><h3>Requirements</h3></summary>
+## Install
 
-### Essential
-- stow (use package manager)
+Clone the repo:
 
-### Basic Setup
-For zsh
- - zsh (use package manager)
- - [antibody](https://getantibody.github.io/install)
- - [starship](https://starship.rs/guide/#%F0%9F%9A%80-installation)
-
-For nvim
- - [neovim](https://github.com/neovim/neovim)
- - [lazynvim](https://github.com/folke/lazy.nvim)
- - ripgrep (use package manager)
-
-### More than the terminal
- - [Hyprland](https://github.com/hyprwm/Hyprland)
- - [Kitty](https://sw.kovidgoyal.net/kitty/)
- - [Rofi](https://github.com/lbonn/rofi)
- - [Waybar](https://github.com/Alexays/Waybar)
-
-</details>
-
-### Install
-- Check the requirements section above.
-- Clone the repo
-```
-git clone https://gitlab.com/AHMZA/dot
+```sh
+git clone git@github.com:ahmzaa/dot.git ~/dot
+cd ~/dot
 ```
 
-- Run stow
-```
-# '*/' basically means all folders / configs
+Stow everything, or individual packages:
+
+```sh
+# all packages
 stow */
 
-# to stow a single folder / config
-stow <foldername>
-# i.e
+# a single package
+stow zsh
 stow nvim
 ```
 
-- Generate zsh plugins
-```
-antibody bundle < ~/.config/zsh/plugins > ~/.zsh_plugins
-```
+Make zsh your default shell:
 
-- Make zsh your default shell
-```
+```sh
 chsh -s $(which zsh)
 ```
 
-- Logout and Login
+There is also an `install` script that bootstraps the basics on Debian/Ubuntu
+(zsh, stow, neovim, and friends).
 
+## Host-specific config
 
-**For more information on each of the configurations, check their respective READMEs**
+`zsh` detects the OS and hostname (`zsh/.config/zsh/os-specific.sh`) and sources
+a matching file from `zsh/.config/zsh/hosts/`. See the
+[zsh README](zsh/.config/zsh/README.md) for details.
+
+## Docs
+
+- [SSH agent & certificate setup](docs/ssh-cert-setup.md)
+
+## Questions?
+
+[support@ahmza.com](mailto:support@ahmza.com)
