@@ -218,6 +218,21 @@ install_starship() {
     fi
 }
 
+# opencode isn't in distro repos — install via its official script.
+install_opencode() {
+    if command -v opencode >/dev/null 2>&1; then
+        info "opencode already installed."
+        return 0
+    fi
+    info "Installing opencode via official script..."
+    if curl -fsSL https://opencode.ai/install | bash; then
+        unmark_manual opencode
+    else
+        warn "Could not install opencode automatically."
+        MANUAL_DEPS+=("opencode")
+    fi
+}
+
 # Rust target triple for prebuilt-binary downloads (yazi et al.).
 target_triple() {
     local arch os
@@ -319,6 +334,7 @@ install_selected_deps() {
     # Tools with special install/fallback handling, only if selected.
     if selected_has starship; then step "Installing starship"; install_starship; fi
     if selected_has yazi;     then step "Installing yazi";     install_yazi;     fi
+    if selected_has opencode; then step "Installing opencode"; install_opencode; fi
 }
 
 # True if a package is in the SELECTED list.
