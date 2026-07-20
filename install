@@ -143,14 +143,44 @@ pkg_install() {
 CORE_DEPS=(git stow zsh starship fzf ripgrep fd lsd lolcat yazi tmux)
 # neovim handled separately (version check)
 
+# Remove an entry from MANUAL_DEPS (used when a fallback install succeeds).
+unmark_manual() {
+    local keep=() d
+    for d in "${MANUAL_DEPS[@]:-}"; do [[ "$d" == "$1" ]] || keep+=("$d"); done
+    MANUAL_DEPS=("${keep[@]:-}")
+}
+
+# Ensure cargo is available (for source-built fallbacks like yazi on apt).
+ensure_cargo() {
+    command -v cargo >/dev/null 2>&1 && return 0
+    [[ -f "$HOME/.cargo/env" ]] && . "$HOME/.cargo/env"
+    command -v cargo >/dev/null 2>&1 && return 0
+    info "Installing Rust toolchain (rustup) for cargo-based installs..."
+    curl -sSf https://sh.rustup.rs | sh -s -- -y >/dev/null 2>&1 || return 1
+    [[ -f "$HOME/.cargo/env" ]] && . "$HOME/.cargo/env"
+    command -v cargo >/dev/null 2>&1
+}
+
 install_core_deps() {
     step "Installing core dependencies"
     pkg_install "${CORE_DEPS[@]}"
 
-    # starship / yazi official-script fallbacks if the manager lacks them.
+    # starship fallback: official install script.
     if ! command -v starship >/dev/null 2>&1; then
         info "Installing starship via official script..."
-        curl -sS https://starship.rs/install.sh | sh -s -- -y || MANUAL_DEPS+=("starship")
+        if curl -sS https://starship.rs/install.sh | sh -s -- -y; then
+            unmark_manual starship
+        fi
+    fi
+
+    # yazi fallback (e.g. apt has no yazi package): build with cargo.
+    if ! command -v yazi >/dev/null 2>&1; then
+        info "yazi not available via $PM — trying cargo..."
+        if ensure_cargo && cargo install --locked yazi-fm yazi-cli; then
+            unmark_manual yazi
+        else
+            warn "Could not install yazi automatically."
+        fi
     fi
 }
 
