@@ -17,6 +17,8 @@ has kubectl && . <(kubectl completion zsh) && compdef _kubectl kubectl && compde
 has gh && . <(gh completion -s zsh) && compdef _gh gh
 has op && . <(op completion zsh) && compdef _op op
 
-# SSH AGENT
-source "$ZDOTDIR/ssh-agent"
+# SSH: agent is sourced globally from .zshrc (OS-aware).
+# One-time bootstrap on this machine to store the key passphrase in the
+# macOS Keychain so it auto-loads on every login:
+#   ssh-add --apple-use-keychain ~/.ssh/id_ed25519
 

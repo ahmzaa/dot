@@ -107,8 +107,14 @@ bindkey '^f' openfff
 #----------------------------------------------------------------------
 # Load
 #----------------------------------------------------------------------
-# Source Host Specific Settings
+# Source Host Specific Settings (sets SSH_SK_PROVIDER, CA vars via shell/vars, etc.)
 source $ZDOTDIR/os-specific.sh
+
+# SSH agent (OS-aware: launchd/Keychain on macOS, persistent agent on Linux)
+source "$ZDOTDIR/ssh-agent"
+
+# SSH certificate check/renewal (autodetects certs, non-blocking, needs the agent)
+"$ZDOTDIR/ssh-cert"
 
 # Load fzf
 source <(fzf --zsh)

@@ -1,0 +1,106 @@
+#!/usr/bin/env bash
+#####################################################################
+# ssh-cert — check & renew SSH user certificates at shell startup.
+#
+# Behaviour:
+#   * Autodetects every ~/.ssh/*-cert.pub certificate.
+#   * Prints the remaining validity for each cert (always visible).
+#   * If a cert falls below the renewal threshold, renews it against
+#     the CA using key-based (non-interactive) auth.
+#   * Never blocks the shell: if the CA is unreachable it warns and
+#     skips.
+#
+# Configuration (set in the gitignored $XDG_CONFIG_HOME/shell/vars):
+#   SSH_CA_HOST              CA hostname/IP (e.g. 10.10.100.13)
+#   SSH_CA_USER              principal to sign for (e.g. ahmza)
+#   SSH_CERT_RENEW_THRESHOLD seconds; renew when less than this remains
+#                            (default 3600)
+#
+# Requires: a bootstrap key (e.g. ~/.ssh/id_ed25519) trusted by the CA
+# so scp/ssh work without a password. See docs/ssh-cert-setup.md.
+#####################################################################
+
+SSH_DIR="$HOME/.ssh"
+SSH_CERT_RENEW_THRESHOLD="${SSH_CERT_RENEW_THRESHOLD:-3600}"
+
+# Nothing to do if there are no certs on this machine.
+certs=("$SSH_DIR"/*-cert.pub)
+if [ ! -e "${certs[0]}" ]; then
+    exit 0
+fi
+
+# Human-readable duration from a number of seconds.
+_fmt_duration() {
+    local total="$1" h m
+    if [ "$total" -lt 0 ]; then
+        echo "expired"
+        return
+    fi
+    h=$(( total / 3600 ))
+    m=$(( (total % 3600) / 60 ))
+    echo "${h}h${m}m"
+}
+
+# Parse the "Valid: ... to <ISO>" expiry from a cert into a unix ts.
+_cert_expiry_ts() {
+    local cert="$1" expiry_str
+    expiry_str=$(ssh-keygen -Lf "$cert" 2>/dev/null | grep "Valid:" | awk '{print $5}')
+    [ -z "$expiry_str" ] && return 1
+    # macOS (date -j) with Linux (date -d) fallback.
+    date -j -f "%Y-%m-%dT%H:%M:%S" "$expiry_str" "+%s" 2>/dev/null \
+        || date -d "$expiry_str" "+%s" 2>/dev/null
+}
+
+# Preflight: is the CA reachable without prompting for a password?
+_ca_reachable() {
+    [ -n "$SSH_CA_HOST" ] || return 1
+    ssh -o BatchMode=yes -o ConnectTimeout=5 "$SSH_CA_HOST" true >/dev/null 2>&1
+}
+
+_renew_cert() {
+    local cert="$1"
+    local base pub name
+    name=$(basename "$cert")            # id_ed25519_sk-cert.pub
+    base="${name%-cert.pub}"            # id_ed25519_sk
+    pub="$SSH_DIR/${base}.pub"
+
+    if [ ! -f "$pub" ]; then
+        echo "ssh-cert: missing public key $pub for $name, skipping renewal" >&2
+        return 1
+    fi
+    if [ -z "$SSH_CA_HOST" ] || [ -z "$SSH_CA_USER" ]; then
+        echo "ssh-cert: SSH_CA_HOST / SSH_CA_USER not set, cannot renew $name" >&2
+        return 1
+    fi
+    if ! _ca_reachable; then
+        echo "ssh-cert: CA $SSH_CA_HOST unreachable, skipping renewal of $name" >&2
+        return 1
+    fi
+
+    echo "ssh-cert: renewing $name ..."
+    scp -o BatchMode=yes -o ConnectTimeout=5 "$pub" "$SSH_CA_HOST:/tmp/" \
+        && ssh -T -o BatchMode=yes -o ConnectTimeout=5 "$SSH_CA_HOST" \
+               "./sign-key /tmp/${base}.pub $SSH_CA_USER" < /dev/null \
+        && scp -o BatchMode=yes -o ConnectTimeout=5 \
+               "$SSH_CA_HOST:/tmp/${base}-cert.pub" "$SSH_DIR/" \
+        && echo "ssh-cert: $name renewed" \
+        || echo "ssh-cert: renewal of $name failed" >&2
+}
+
+now=$(date +%s)
+for cert in "${certs[@]}"; do
+    [ -f "$cert" ] || continue
+    name=$(basename "$cert")
+    expiry=$(_cert_expiry_ts "$cert") || {
+        echo "ssh-cert: could not read expiry for $name" >&2
+        continue
+    }
+    remaining=$(( expiry - now ))
+
+    if [ "$remaining" -lt "$SSH_CERT_RENEW_THRESHOLD" ]; then
+        echo "ssh-cert: $name expires in $(_fmt_duration "$remaining") — renewing"
+        _renew_cert "$cert"
+    else
+        echo "ssh-cert: $name valid for $(_fmt_duration "$remaining")"
+    fi
+done

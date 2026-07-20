@@ -1,25 +1,52 @@
-##### START Fix for ssh-agent #####
-# Ref: http://mah.everybody.org/docs/ssh
--
+#!/usr/bin/env bash
+#####################################################################
+# SSH agent bootstrap (OS-aware)
+#
+# - macOS  : use the launchd-managed agent + Keychain. If no keys are
+#            loaded, pull passphrase-protected keys from the Keychain.
+# - Linux  : maintain a single persistent agent across shells via
+#            ~/.ssh/environment. Keys are added on first use thanks to
+#            `AddKeysToAgent yes` in ~/.ssh/config.
+#
+# Sourced globally from .zshrc. Safe to source in every shell.
+#####################################################################
+
 SSH_ENV="$HOME/.ssh/environment"
--
-function start_agent {
-    echo "Initialising new SSH agent..."
-    /usr/bin/ssh-agent | sed 's/^echo/#echo/' > "${SSH_ENV}"
-    echo succeeded
-    chmod 600 "${SSH_ENV}"
-    . "${SSH_ENV}" > /dev/null
-    /usr/bin/ssh-add;
+
+# Return 0 if the agent behind $SSH_AUTH_SOCK is reachable.
+# `ssh-add -l` exit codes:
+#   0 = agent reachable, has keys
+#   1 = agent reachable, no keys
+#   2 = agent unreachable / socket dead
+_ssh_agent_reachable() {
+    ssh-add -l >/dev/null 2>&1
+    [ "$?" -ne 2 ]
 }
--
-# Source SSH settings, if applicable
-if [ -f "${SSH_ENV}" ]; then
-    . "${SSH_ENV}" > /dev/null
-    #ps ${SSH_AGENT_PID} doesn't work under cywgin
-    ps -ef | grep ${SSH_AGENT_PID} | grep ssh-agent$ > /dev/null || {
-        start_agent;
-    }
-else
-    start_agent;
-fi
-##### END Fix for ssh-agent #####
+
+case "$(uname -s)" in
+    Darwin)
+        # macOS: rely on the launchd agent. Load Keychain-stored keys if
+        # the agent currently has none.
+        if ! ssh-add -l >/dev/null 2>&1; then
+            ssh-add --apple-load-keychain >/dev/null 2>&1
+        fi
+        ;;
+    *)
+        # Linux (and other): persistent hand-rolled agent.
+        start_agent() {
+            echo "Initialising new SSH agent..."
+            /usr/bin/ssh-agent | sed 's/^echo/#echo/' > "${SSH_ENV}"
+            chmod 600 "${SSH_ENV}"
+            . "${SSH_ENV}" >/dev/null
+        }
+
+        if [ -f "${SSH_ENV}" ]; then
+            . "${SSH_ENV}" >/dev/null
+            # Restart only if the socket is actually dead (handles stale
+            # ~/.ssh/environment pointing at a defunct agent).
+            _ssh_agent_reachable || start_agent
+        else
+            start_agent
+        fi
+        ;;
+esac

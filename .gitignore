@@ -3,3 +3,4 @@ zsh/.config/zsh/.zcompdump
 zsh/.config/zsh/.zcompdump*
 zsh/.config/zsh/.zsh_history
 shell/.config/shell/vars
+ssh/.ssh/config.local
