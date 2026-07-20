@@ -1,64 +1,418 @@
 #!/usr/bin/env bash
+#####################################################################
+# Dotfiles installer
+#
+# Cross-platform (macOS + Linux). Detects the package manager, lets you
+# choose which stow packages to install (individually or by group),
+# installs a curated set of core dependencies plus any per-package
+# extras, checks neovim against the latest stable, stows your selection,
+# and (optionally) sets zsh as your login shell.
+#
+# Safe to re-run; stow is applied with --restow.
+#####################################################################
+set -euo pipefail
 
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-NC='\033[0m' # No Color
+#--------------------------------------------------------------------
+# Output helpers
+#--------------------------------------------------------------------
+RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[0;33m'; BLUE='\033[0;34m'; NC='\033[0m'
+info()  { printf "${GREEN}==>${NC} %s\n" "$*"; }
+warn()  { printf "${YELLOW}==> warning:${NC} %s\n" "$*"; }
+error() { printf "${RED}==> error:${NC} %s\n" "$*" >&2; }
+step()  { printf "\n${BLUE}==> %s${NC}\n" "$*"; }
 
-printf "\nWelcome to the install script.\n\n"
-printf "${RED}This will install basic terminal setup requirements${NC}\n"
-printf "${RED}- zsh\n- stow\n- neovim\n- lolcat\n- ripgrep\n- fd-find\n- antibody\n- starship${NC}\n\n"
-printf "${RED}As well as some build dependencies for nvim${NC}\n"
-printf "${RED}- curl\n- unzip\n- cmake\n- gettext\n- ninja-build\n- build-essential${NC}\n\n"
-printf "${GREEN}Would you like to continue${NC}\n"
+confirm() {
+    # confirm "Question?" -> returns 0 for yes, 1 for no (default No)
+    local prompt="${1:-Continue?}" reply
+    printf "${GREEN}%s${NC} [y/N] " "$prompt"
+    read -r reply
+    [[ "$reply" =~ ^[Yy]$ ]]
+}
 
-select yn in "Yes" "No"; do
-    case $yn in
-        Yes ) break;;
-        No ) exit ;;
+# Track dependencies we couldn't install so we can report them at the end.
+MANUAL_DEPS=()
+
+#--------------------------------------------------------------------
+# Repo root (auto-detected from this script's location)
+#--------------------------------------------------------------------
+REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
+
+# Every top-level dir except non-stow ones is a package.
+NON_PACKAGES=(docs)
+
+#--------------------------------------------------------------------
+# OS / package-manager detection
+#--------------------------------------------------------------------
+OS=""; PM=""
+detect_platform() {
+    case "$(uname -s)" in
+        Darwin) OS="macos" ;;
+        Linux)  OS="linux" ;;
+        *) error "Unsupported OS: $(uname -s)"; exit 1 ;;
     esac
-done
 
-sudo /bin/bash <<EOF
-    apt install git stow zsh ripgrep lolcat fd-find ninja-build gettext cmake unzip curl build-essential -y
-    git clone --depth=1 https://github.com/mattmc3/antidote.git ${ZDOTDIR:-$HOME}/.antidote
-    curl -sS https://starship.rs/install.sh | sh -s -- -y
-EOF
+    if [[ "$OS" == "macos" ]]; then
+        PM="brew"
+    elif command -v apt >/dev/null 2>&1; then
+        PM="apt"
+    elif command -v pacman >/dev/null 2>&1; then
+        PM="pacman"
+    elif command -v dnf >/dev/null 2>&1; then
+        PM="dnf"
+    else
+        error "No supported package manager found (need brew, apt, pacman or dnf)."
+        exit 1
+    fi
+    info "Detected OS: $OS, package manager: $PM"
+}
 
-printf "\n${GREEN}Installing NeoVim from source${NC}\n"
+ensure_homebrew() {
+    [[ "$PM" == "brew" ]] || return 0
+    if ! command -v brew >/dev/null 2>&1; then
+        info "Homebrew not found — installing..."
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        # Make brew available for the rest of this run.
+        [[ -x /opt/homebrew/bin/brew ]] && eval "$(/opt/homebrew/bin/brew shellenv)"
+        [[ -x /usr/local/bin/brew ]] && eval "$(/usr/local/bin/brew shellenv)"
+    fi
+}
 
-
-# Install NeoVim from source (latest stable)
-git clone https://github.com/neovim/neovim $HOME/src/neovim
-pushd $HOME/src/neovim
-git checkout stable
-make CMAKE_BUILD_TYPE=RelWithDebInfo
-pushd build && cpack -G DEB && sudo dpkg -i nvim-linux64.deb
-popd
-popd
-
-printf "\n${GREEN}Would you like to stow the basics now?${NC}\n"
-printf "\n${GREEN}- zsh\n- nvim\n- starship${NC}\n\n"
-
-select yn in "Yes" "No"; do
-    case $yn in
-        Yes ) break;;
-        No ) exit ;;
+#--------------------------------------------------------------------
+# Package-name mapping: generic name -> per-manager name.
+# Empty string means "not available on this manager" (skip).
+#--------------------------------------------------------------------
+map_pkg() {
+    local name="$1"
+    case "$name" in
+        fd)
+            case "$PM" in apt) echo "fd-find" ;; *) echo "fd" ;; esac ;;
+        ripgrep) echo "ripgrep" ;;
+        neovim)  echo "neovim" ;;
+        pywal)
+            case "$PM" in
+                brew) echo "" ;;         # install via pip fallback
+                pacman) echo "python-pywal" ;;
+                *) echo "" ;;            # pip fallback
+            esac ;;
+        aerospace)
+            case "$PM" in brew) echo "nikitabobko/tap/aerospace" ;; *) echo "" ;; esac ;;
+        *) echo "$name" ;;               # default: same name everywhere
     esac
-done
+}
 
-cd $HOME/dot
-stow zsh
-stow nvim
-stow starship
-
-
-printf "\n${GREEN}Would you like to change your shell to zsh now?${NC}\n"
-
-select yn in "Yes" "No"; do
-    case $yn in
-        Yes ) break;;
-        No ) exit ;;
+pm_install_raw() {
+    # Install already-mapped package names for the current manager.
+    local pkgs=("$@")
+    [[ ${#pkgs[@]} -eq 0 ]] && return 0
+    case "$PM" in
+        brew)   brew install "${pkgs[@]}" ;;
+        apt)    sudo apt install -y "${pkgs[@]}" ;;
+        pacman) sudo pacman -S --needed --noconfirm "${pkgs[@]}" ;;
+        dnf)    sudo dnf install -y "${pkgs[@]}" ;;
     esac
-done
+}
 
-chsh -s $(which zsh)
+pkg_install() {
+    # Install a list of GENERIC names; maps each and installs one-by-one so a
+    # single missing package doesn't abort the batch.
+    local generic mapped
+    for generic in "$@"; do
+        mapped="$(map_pkg "$generic")"
+        if [[ -z "$mapped" ]]; then
+            # No package for this manager — handle special fallbacks.
+            case "$generic" in
+                pywal)
+                    if command -v pip3 >/dev/null 2>&1; then
+                        pip3 install --user pywal >/dev/null 2>&1 && continue
+                    fi ;;
+            esac
+            warn "No '$generic' package for $PM — skipping."
+            MANUAL_DEPS+=("$generic")
+            continue
+        fi
+        if ! pm_install_raw "$mapped"; then
+            warn "Failed to install '$generic' ($mapped) — continuing."
+            MANUAL_DEPS+=("$generic")
+        fi
+    done
+}
+
+#--------------------------------------------------------------------
+# Curated core dependencies (installed for every setup)
+#--------------------------------------------------------------------
+CORE_DEPS=(git stow zsh starship fzf ripgrep fd lsd lolcat yazi tmux)
+# neovim handled separately (version check)
+
+install_core_deps() {
+    step "Installing core dependencies"
+    pkg_install "${CORE_DEPS[@]}"
+
+    # starship / yazi official-script fallbacks if the manager lacks them.
+    if ! command -v starship >/dev/null 2>&1; then
+        info "Installing starship via official script..."
+        curl -sS https://starship.rs/install.sh | sh -s -- -y || MANUAL_DEPS+=("starship")
+    fi
+}
+
+#--------------------------------------------------------------------
+# Per-package extra dependencies (installed only when selected)
+#--------------------------------------------------------------------
+pkg_deps() {
+    case "$1" in
+        hypr)      echo "hyprland hypridle hyprlock hyprsunset" ;;
+        waybar)    echo "waybar" ;;
+        dunst)     echo "dunst" ;;
+        tofi)      echo "tofi" ;;
+        wal)       echo "pywal" ;;
+        foot)      echo "foot" ;;
+        MangoHud)  echo "mangohud" ;;
+        rmpc)      echo "rmpc" ;;
+        aerospace) echo "aerospace" ;;
+        ghostty)   echo "ghostty" ;;
+        *)         echo "" ;;
+    esac
+}
+
+install_selected_deps() {
+    local pkg deps
+    local to_install=()
+    for pkg in "${SELECTED[@]}"; do
+        deps="$(pkg_deps "$pkg")"
+        [[ -n "$deps" ]] && to_install+=($deps)
+    done
+    if [[ ${#to_install[@]} -gt 0 ]]; then
+        step "Installing dependencies for selected packages"
+        pkg_install "${to_install[@]}"
+    fi
+}
+
+#--------------------------------------------------------------------
+# Neovim: compare packaged version with GitHub stable
+#--------------------------------------------------------------------
+ver_normalize() { sed -E 's/^v//; s/[^0-9.].*$//'; }
+ver_ge() {
+    # ver_ge A B -> 0 if A >= B
+    [ "$(printf '%s\n%s\n' "$1" "$2" | sort -V | head -n1)" = "$2" ]
+}
+
+pm_nvim_version() {
+    case "$PM" in
+        brew)   brew info --json=v2 neovim 2>/dev/null | grep -m1 '"stable"' | sed -E 's/.*"stable": *"([^"]+)".*/\1/' ;;
+        apt)    apt-cache policy neovim 2>/dev/null | awk '/Candidate:/{print $2}' ;;
+        pacman) pacman -Si neovim 2>/dev/null | awk -F': ' '/Version/{print $2; exit}' ;;
+        dnf)    dnf info neovim 2>/dev/null | awk -F': ' '/Version/{print $2; exit}' ;;
+    esac
+}
+
+install_neovim() {
+    step "Neovim"
+    local gh_ver pm_ver
+    # The 'stable' tag is a moving alias (tag_name == "stable"); use the
+    # latest release, whose tag_name is the real version (e.g. v0.12.4).
+    gh_ver="$(curl -s https://api.github.com/repos/neovim/neovim/releases/latest 2>/dev/null \
+        | grep -m1 '"tag_name"' | sed -E 's/.*"tag_name": *"([^"]+)".*/\1/' | ver_normalize)"
+    pm_ver="$(pm_nvim_version | ver_normalize)"
+
+    if [[ -z "$gh_ver" ]]; then
+        warn "Couldn't reach GitHub for the latest stable version; using the packaged neovim."
+        pkg_install neovim; return
+    fi
+    if [[ -z "$pm_ver" ]]; then
+        warn "Neovim not offered by $PM. Latest stable is v$gh_ver."
+        info "See https://github.com/neovim/neovim/releases/tag/stable for a prebuilt binary."
+        MANUAL_DEPS+=("neovim (v$gh_ver)")
+        return
+    fi
+
+    info "Packaged neovim: v$pm_ver  |  GitHub stable: v$gh_ver"
+    if ver_ge "$pm_ver" "$gh_ver"; then
+        info "Packaged version is up to date — installing via $PM."
+        pkg_install neovim
+    else
+        warn "Packaged neovim (v$pm_ver) is older than stable (v$gh_ver)."
+        if confirm "Install the older packaged version anyway?"; then
+            pkg_install neovim
+        else
+            info "Skipping. Grab the prebuilt stable binary from:"
+            info "  https://github.com/neovim/neovim/releases/tag/stable"
+            MANUAL_DEPS+=("neovim (v$gh_ver)")
+        fi
+    fi
+}
+
+#--------------------------------------------------------------------
+# Package discovery & selection
+#--------------------------------------------------------------------
+ALL_PACKAGES=()
+discover_packages() {
+    local d base
+    for d in "$REPO_DIR"/*/; do
+        base="$(basename "$d")"
+        local skip=0
+        local np
+        for np in "${NON_PACKAGES[@]}"; do [[ "$base" == "$np" ]] && skip=1; done
+        [[ $skip -eq 0 ]] && ALL_PACKAGES+=("$base")
+    done
+}
+
+# Predefined groups
+GROUP_CORE=(zsh shell nvim starship tmux bin ssh xdg-dirs yazi)
+GROUP_DESKTOP_LINUX=(hypr waybar dunst tofi wal foot MangoHud)
+GROUP_DESKTOP_MACOS=(aerospace ghostty)
+
+expand_group() {
+    case "$1" in
+        core)          printf '%s\n' "${GROUP_CORE[@]}" ;;
+        desktop-linux) printf '%s\n' "${GROUP_DESKTOP_LINUX[@]}" ;;
+        desktop-macos) printf '%s\n' "${GROUP_DESKTOP_MACOS[@]}" ;;
+        all)           printf '%s\n' "${ALL_PACKAGES[@]}" ;;
+    esac
+}
+
+# Choose a multi-select tool. Prefer gum, then fzf, else bash select.
+# Sets the global SELECTOR (not echoed) so interactive prompts work — a
+# command-substitution subshell would swallow the confirm prompt.
+SELECTOR=""
+pick_selector() {
+    if command -v gum >/dev/null 2>&1; then SELECTOR="gum"; return; fi
+    if command -v fzf >/dev/null 2>&1; then SELECTOR="fzf"; return; fi
+    # Offer to install gum (except Debian/apt, where we fall back to fzf/select).
+    if [[ "$PM" != "apt" ]] && confirm "Install 'gum' for a nicer selection menu?"; then
+        pkg_install gum
+        command -v gum >/dev/null 2>&1 && { SELECTOR="gum"; return; }
+    fi
+    command -v fzf >/dev/null 2>&1 && { SELECTOR="fzf"; return; }
+    SELECTOR="select"
+}
+
+SELECTED=()
+select_packages() {
+    step "Choose what to install"
+
+    # Build the menu: groups first, then individual packages.
+    local menu=("group:all" "group:core")
+    [[ "$OS" == "linux" ]] && menu+=("group:desktop-linux")
+    [[ "$OS" == "macos" ]] && menu+=("group:desktop-macos")
+    local p
+    for p in "${ALL_PACKAGES[@]}"; do menu+=("$p"); done
+
+    local suggested="core"
+    [[ "$OS" == "macos" ]] && suggested="core + desktop-macos"
+    [[ "$OS" == "linux" ]] && suggested="core + desktop-linux"
+    info "Suggested for $OS: $suggested (you can pick anything below)"
+
+    local chosen=()
+    pick_selector
+
+    case "$SELECTOR" in
+        gum)
+            mapfile -t chosen < <(printf '%s\n' "${menu[@]}" | \
+                gum choose --no-limit --header="Space to select, Enter to confirm") ;;
+        fzf)
+            mapfile -t chosen < <(printf '%s\n' "${menu[@]}" | \
+                fzf --multi --prompt="select> " \
+                    --header="TAB to select multiple, Enter to confirm") ;;
+        select)
+            echo "Enter numbers separated by spaces (e.g. '1 3 5'):"
+            local i=1
+            for item in "${menu[@]}"; do printf "  %2d) %s\n" "$i" "$item"; i=$((i+1)); done
+            local nums reply
+            read -r reply
+            for nums in $reply; do
+                [[ "$nums" =~ ^[0-9]+$ ]] && chosen+=("${menu[$((nums-1))]}")
+            done ;;
+    esac
+
+    [[ ${#chosen[@]} -eq 0 ]] && { error "Nothing selected. Aborting."; exit 1; }
+
+    # Expand groups and de-duplicate.
+    local raw=() c
+    for c in "${chosen[@]}"; do
+        if [[ "$c" == group:* ]]; then
+            while read -r g; do raw+=("$g"); done < <(expand_group "${c#group:}")
+        else
+            raw+=("$c")
+        fi
+    done
+    # de-dup
+    local seen=" " item
+    for item in "${raw[@]}"; do
+        [[ "$seen" == *" $item "* ]] && continue
+        SELECTED+=("$item"); seen+="$item "
+    done
+
+    info "Will stow: ${SELECTED[*]}"
+}
+
+#--------------------------------------------------------------------
+# Stow
+#--------------------------------------------------------------------
+stow_packages() {
+    step "Stowing packages"
+    local pkg
+    for pkg in "${SELECTED[@]}"; do
+        if [[ -d "$REPO_DIR/$pkg" ]]; then
+            info "stow -R $pkg"
+            ( cd "$REPO_DIR" && stow -R "$pkg" )
+        else
+            warn "Package '$pkg' not found in $REPO_DIR — skipping."
+        fi
+    done
+}
+
+#--------------------------------------------------------------------
+# Shell change (guarded)
+#--------------------------------------------------------------------
+set_default_shell() {
+    step "Default shell"
+    local zsh_path
+    zsh_path="$(command -v zsh || true)"
+    [[ -z "$zsh_path" ]] && { warn "zsh not found on PATH; skipping shell change."; return; }
+
+    if [[ "${SHELL:-}" == "$zsh_path" ]]; then
+        info "zsh is already your login shell."
+        return
+    fi
+    if ! confirm "Set zsh ($zsh_path) as your default shell?"; then
+        info "Leaving login shell unchanged."
+        return
+    fi
+    # Ensure the zsh path is a valid login shell (needed for Homebrew zsh).
+    if ! grep -qx "$zsh_path" /etc/shells 2>/dev/null; then
+        info "Adding $zsh_path to /etc/shells"
+        echo "$zsh_path" | sudo tee -a /etc/shells >/dev/null
+    fi
+    chsh -s "$zsh_path" && info "Login shell set to zsh (restart your terminal)."
+}
+
+#--------------------------------------------------------------------
+# Main
+#--------------------------------------------------------------------
+main() {
+    printf "\n${GREEN}Dotfiles installer${NC}\n"
+    printf "Repo: %s\n" "$REPO_DIR"
+    printf "This will detect your package manager, install dependencies, stow\n"
+    printf "your chosen configs, and optionally set zsh as your shell.\n\n"
+
+    detect_platform
+    confirm "Continue?" || { info "Aborted."; exit 0; }
+
+    ensure_homebrew
+    discover_packages
+
+    install_core_deps
+    select_packages
+    install_selected_deps
+    install_neovim
+    stow_packages
+    set_default_shell
+
+    step "Done"
+    info "Stowed: ${SELECTED[*]}"
+    if [[ ${#MANUAL_DEPS[@]} -gt 0 ]]; then
+        warn "These need manual installation: ${MANUAL_DEPS[*]}"
+    fi
+    info "Open a new terminal to pick up your new shell/config."
+}
+
+main "$@"

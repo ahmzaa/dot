@@ -36,37 +36,59 @@ Each top-level directory is a Stow package whose contents mirror `$HOME`.
 - [lsd](https://github.com/lsd-rs/lsd), [lolcat](https://github.com/busyloop/lolcat), [yazi](https://github.com/sxyazi/yazi)
 - [neovim](https://github.com/neovim/neovim) (uses [lazy.nvim](https://github.com/folke/lazy.nvim))
 
-Zsh plugins are cloned automatically on first shell start into `~/.zsh/plugins`
+The `install` script installs these for you. Zsh plugins are also cloned
+automatically on first shell start into `~/.zsh/plugins`
 (zsh-autosuggestions, zsh-syntax-highlighting, zsh-completions, fzf-tab).
 
 ## Install
 
-Clone the repo:
+Clone the repo (anywhere — the installer auto-detects its location):
 
 ```sh
 git clone git@github.com:ahmzaa/dot.git ~/dot
 cd ~/dot
 ```
 
-Stow everything, or individual packages:
+### Guided install (recommended)
+
+Run the interactive installer:
 
 ```sh
-# all packages
-stow */
-
-# a single package
-stow zsh
-stow nvim
+./install
 ```
 
-Make zsh your default shell:
+It will:
+
+- **Detect your OS and package manager** — macOS (Homebrew, auto-installed
+  if missing) or Linux (`apt`, `pacman`, or `dnf`).
+- **Install a curated set of core dependencies** — git, stow, zsh, starship,
+  fzf, ripgrep, fd, lsd, lolcat, yazi, tmux.
+- **Let you choose what to stow** via a menu (uses `gum` or `fzf` if
+  available, otherwise a numbered prompt). Pick individual packages or a
+  predefined group:
+  - `core` — zsh, shell, nvim, starship, tmux, bin, ssh, xdg-dirs, yazi
+  - `desktop-linux` — hypr, waybar, dunst, tofi, wal, foot, MangoHud
+  - `desktop-macos` — aerospace, ghostty
+  - `all` — everything
+- **Install per-package dependencies** for your selection (e.g. Hyprland for
+  the `hypr` package).
+- **Check neovim** — compares the packaged version against the latest stable
+  release and warns if the packaged one is behind.
+- **Stow your selection** and, if you agree, **set zsh as your login shell**
+  (adding it to `/etc/shells` first when needed).
+
+It is safe to re-run; stow is applied with `--restow`.
+
+### Manual install
+
+If you'd rather do it by hand:
 
 ```sh
-chsh -s $(which zsh)
+# install deps with your package manager, then:
+stow */          # everything
+stow zsh nvim    # or specific packages
+chsh -s "$(command -v zsh)"
 ```
-
-There is also an `install` script that bootstraps the basics on Debian/Ubuntu
-(zsh, stow, neovim, and friends).
 
 ## Host-specific config
 
