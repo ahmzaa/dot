@@ -25,6 +25,7 @@
 #pulseaudio-slider,
 #network,
 #language,
+#mpd,
 #battery {
   background-color: @background;
   margin-top: 6px;
@@ -37,6 +38,7 @@
 /* Separation to the left */
 #clock,
 #cpu,
+#mpd,
 #idle_inhibitor {
   margin-left: 5px;
   border-top-left-radius: 10px;
@@ -47,6 +49,7 @@
 #clock,
 #temperature,
 #language,
+#mpd,
 #battery.2 {
   margin-right: 5px;
   border-top-right-radius: 10px;
@@ -189,6 +192,22 @@
 
 #battery.2 {
   padding-right: 20px;
+}
+
+#mpd {
+  color: #D47D72;
+}
+#mpd.disconnected {
+  color: #D47D72;
+}
+#mpd.stopped {
+  color: #D47D72;
+}
+#mpd.playing {
+  color: #D47D72;
+}
+#mpd.paused {
+  color: #D47D72;
 }
 
 /* === Optional animation === */

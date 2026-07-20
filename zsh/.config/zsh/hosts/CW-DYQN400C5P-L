@@ -17,3 +17,6 @@ has kubectl && . <(kubectl completion zsh) && compdef _kubectl kubectl && compde
 has gh && . <(gh completion -s zsh) && compdef _gh gh
 has op && . <(op completion zsh) && compdef _op op
 
+# SSH AGENT
+source "$ZDOTDIR/ssh-agent"
+
