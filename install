@@ -509,8 +509,8 @@ main() {
     print_banner
     printf "\n${GREEN}Dotfiles installer${NC}\n"
     printf "Repo: %s\n" "$REPO_DIR"
-    printf "This will detect your package manager, install dependencies, stow\n"
-    printf "your chosen configs, and optionally set zsh as your shell.\n\n"
+    printf "You'll pick which configs to install, then this will install their\n"
+    printf "dependencies, stow them, and optionally set zsh as your shell.\n\n"
 
     detect_platform
     confirm "Continue?" || { info "Aborted."; exit 0; }
@@ -518,8 +518,11 @@ main() {
     ensure_homebrew
     discover_packages
 
-    install_core_deps
+    # Choose everything first (the only thing that may install beforehand is
+    # gum, if you opt in for a nicer menu), then do all installs together.
     select_packages
+
+    install_core_deps
     install_selected_deps
     install_neovim
     stow_packages
