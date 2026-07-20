@@ -518,15 +518,38 @@ select_packages() {
 #--------------------------------------------------------------------
 # Stow
 #--------------------------------------------------------------------
+# Back up any existing non-symlink targets that would block stowing $pkg,
+# so a fresh machine with default dotfiles (e.g. ~/.zshenv) doesn't conflict.
+# Backups go to <file>.pre-stow.bak.
+backup_conflicts() {
+    local pkg="$1" rel target
+    # List files the package provides (relative to the package dir).
+    while IFS= read -r rel; do
+        target="$HOME/$rel"
+        # Only back up real files/dirs that aren't already our symlink.
+        if [[ -e "$target" && ! -L "$target" ]]; then
+            info "Backing up existing $target -> $target.pre-stow.bak"
+            mv "$target" "$target.pre-stow.bak"
+        fi
+    done < <(cd "$REPO_DIR/$pkg" && find . -type f -o -type l | sed 's|^\./||')
+}
+
 stow_packages() {
     step "Stowing packages"
     local pkg
     for pkg in "${SELECTED[@]}"; do
-        if [[ -d "$REPO_DIR/$pkg" ]]; then
-            info "stow -R $pkg"
-            ( cd "$REPO_DIR" && stow -R "$pkg" )
-        else
+        if [[ ! -d "$REPO_DIR/$pkg" ]]; then
             warn "Package '$pkg' not found in $REPO_DIR — skipping."
+            continue
+        fi
+        info "stow -R $pkg"
+        if ! ( cd "$REPO_DIR" && stow -R "$pkg" ) 2>/dev/null; then
+            # Likely a conflict with pre-existing files — back them up and retry.
+            warn "Conflicts detected for '$pkg'; backing up existing files and retrying."
+            backup_conflicts "$pkg"
+            if ! ( cd "$REPO_DIR" && stow -R "$pkg" ); then
+                warn "Failed to stow '$pkg' — resolve manually."
+            fi
         fi
     done
 }
