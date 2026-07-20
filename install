@@ -351,9 +351,11 @@ install_neovim() {
     local gh_ver pm_ver
     # The 'stable' tag is a moving alias (tag_name == "stable"); use the
     # latest release, whose tag_name is the real version (e.g. v0.12.4).
+    # The trailing '|| true' stops a failed pipe (e.g. no network, grep no
+    # match) from aborting the script under 'set -e -o pipefail'.
     gh_ver="$(curl -s https://api.github.com/repos/neovim/neovim/releases/latest 2>/dev/null \
-        | grep -m1 '"tag_name"' | sed -E 's/.*"tag_name": *"([^"]+)".*/\1/' | ver_normalize)"
-    pm_ver="$(pm_nvim_version | ver_normalize)"
+        | grep -m1 '"tag_name"' | sed -E 's/.*"tag_name": *"([^"]+)".*/\1/' | ver_normalize || true)"
+    pm_ver="$(pm_nvim_version | ver_normalize || true)"
 
     if [[ -z "$gh_ver" ]]; then
         warn "Couldn't reach GitHub for the latest stable version; using the packaged neovim."
