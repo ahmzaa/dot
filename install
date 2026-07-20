@@ -75,6 +75,7 @@ ensure_homebrew() {
         [[ -x /opt/homebrew/bin/brew ]] && eval "$(/opt/homebrew/bin/brew shellenv)"
         [[ -x /usr/local/bin/brew ]] && eval "$(/usr/local/bin/brew shellenv)"
     fi
+    return 0
 }
 
 #--------------------------------------------------------------------
@@ -147,10 +148,19 @@ CORE_DEPS=(git stow zsh fzf ripgrep fd lsd lolcat tmux)
 # unconditionally here.
 
 # Remove an entry from MANUAL_DEPS (used when a fallback install succeeds).
+# Avoid injecting an empty element when the result is empty (bash 3.2 would
+# otherwise leave a single "" entry and make the array look non-empty).
 unmark_manual() {
     local keep=() d
-    for d in "${MANUAL_DEPS[@]:-}"; do [[ "$d" == "$1" ]] || keep+=("$d"); done
-    MANUAL_DEPS=("${keep[@]:-}")
+    for d in "${MANUAL_DEPS[@]:-}"; do
+        [[ -z "$d" ]] && continue
+        [[ "$d" == "$1" ]] || keep+=("$d")
+    done
+    MANUAL_DEPS=()
+    if [[ ${#keep[@]} -gt 0 ]]; then
+        MANUAL_DEPS=("${keep[@]}")
+    fi
+    return 0
 }
 
 # Ensure cargo is available (for source-built fallbacks like yazi on apt).
@@ -332,6 +342,7 @@ print_group_legend() {
     printf "    %-16s %s\n" "core" "$(group_contents core)"
     [[ "$OS" == "linux" ]] && printf "    %-16s %s\n" "desktop-linux" "$(group_contents desktop-linux)"
     [[ "$OS" == "macos" ]] && printf "    %-16s %s\n" "desktop-macos" "$(group_contents desktop-macos)"
+    return 0
 }
 
 # Choose a multi-select tool. Prefer gum, then fzf, else bash select.
@@ -371,17 +382,21 @@ select_packages() {
     [[ "$OS" == "linux" ]] && suggested="core + desktop-linux"
     info "Suggested for $OS: $suggested (you can pick anything below)"
 
-    local chosen=()
+    local chosen=() line
     pick_selector
 
+    # NOTE: use a `while read` loop rather than `mapfile`/`readarray`, which
+    # don't exist in bash 3.2 (the default on macOS).
     case "$SELECTOR" in
         gum)
-            mapfile -t chosen < <(printf '%s\n' "${menu[@]}" | \
-                gum choose --no-limit --header="Space to select, Enter to confirm") ;;
+            while IFS= read -r line; do [[ -n "$line" ]] && chosen+=("$line"); done \
+                < <(printf '%s\n' "${menu[@]}" | \
+                    gum choose --no-limit --header="Space to select, Enter to confirm" || true) ;;
         fzf)
-            mapfile -t chosen < <(printf '%s\n' "${menu[@]}" | \
-                fzf --multi --prompt="select> " \
-                    --header="TAB to select multiple, Enter to confirm") ;;
+            while IFS= read -r line; do [[ -n "$line" ]] && chosen+=("$line"); done \
+                < <(printf '%s\n' "${menu[@]}" | \
+                    fzf --multi --prompt="select> " \
+                        --header="TAB to select multiple, Enter to confirm" || true) ;;
         select)
             echo "Enter numbers separated by spaces (e.g. '1 3 5'):"
             local i=1
@@ -455,7 +470,11 @@ set_default_shell() {
         info "Adding $zsh_path to /etc/shells"
         echo "$zsh_path" | sudo tee -a /etc/shells >/dev/null
     fi
-    chsh -s "$zsh_path" && info "Login shell set to zsh (restart your terminal)."
+    if chsh -s "$zsh_path"; then
+        info "Login shell set to zsh (restart your terminal)."
+    else
+        warn "chsh failed; set your shell manually: chsh -s $zsh_path"
+    fi
 }
 
 #--------------------------------------------------------------------
@@ -482,8 +501,11 @@ main() {
 
     step "Done"
     info "Stowed: ${SELECTED[*]}"
-    if [[ ${#MANUAL_DEPS[@]} -gt 0 ]]; then
-        warn "These need manual installation: ${MANUAL_DEPS[*]}"
+    # Filter out any empty entries before reporting.
+    local real_manual=() d
+    for d in "${MANUAL_DEPS[@]:-}"; do [[ -n "$d" ]] && real_manual+=("$d"); done
+    if [[ ${#real_manual[@]} -gt 0 ]]; then
+        warn "These need manual installation: ${real_manual[*]}"
     fi
     info "Open a new terminal to pick up your new shell/config."
 }
