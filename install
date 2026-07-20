@@ -140,8 +140,11 @@ pkg_install() {
 #--------------------------------------------------------------------
 # Curated core dependencies (installed for every setup)
 #--------------------------------------------------------------------
-CORE_DEPS=(git stow zsh starship fzf ripgrep fd lsd lolcat yazi tmux)
-# neovim handled separately (version check)
+CORE_DEPS=(git stow zsh fzf ripgrep fd lsd lolcat tmux)
+# neovim handled separately (version check).
+# starship and yazi are their own stow packages, so they are installed as
+# per-package dependencies (see pkg_deps / install_selected_deps) rather than
+# unconditionally here.
 
 # Remove an entry from MANUAL_DEPS (used when a fallback install succeeds).
 unmark_manual() {
@@ -164,16 +167,23 @@ ensure_cargo() {
 install_core_deps() {
     step "Installing core dependencies"
     pkg_install "${CORE_DEPS[@]}"
+}
 
-    # starship fallback: official install script.
+# Fallbacks for tools not always packaged; called after their package's deps
+# are attempted, only when that package was selected.
+install_starship() {
+    pkg_install starship
     if ! command -v starship >/dev/null 2>&1; then
         info "Installing starship via official script..."
         if curl -sS https://starship.rs/install.sh | sh -s -- -y; then
             unmark_manual starship
         fi
     fi
+}
 
-    # yazi fallback (e.g. apt has no yazi package): build with cargo.
+install_yazi() {
+    pkg_install yazi
+    # yazi is not packaged everywhere (e.g. apt) — build with cargo.
     if ! command -v yazi >/dev/null 2>&1; then
         info "yazi not available via $PM — trying cargo..."
         if ensure_cargo && cargo install --locked yazi-fm yazi-cli; then
@@ -214,6 +224,17 @@ install_selected_deps() {
         step "Installing dependencies for selected packages"
         pkg_install "${to_install[@]}"
     fi
+
+    # Tools with special install/fallback handling, only if selected.
+    if selected_has starship; then step "Installing starship"; install_starship; fi
+    if selected_has yazi;     then step "Installing yazi";     install_yazi;     fi
+}
+
+# True if a package is in the SELECTED list.
+selected_has() {
+    local p
+    for p in "${SELECTED[@]}"; do [[ "$p" == "$1" ]] && return 0; done
+    return 1
 }
 
 #--------------------------------------------------------------------
