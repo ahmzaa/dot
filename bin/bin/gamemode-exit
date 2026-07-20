@@ -1,5 +1,0 @@
-#!/bin/bash
-
-# Shutdown Steam and Gamescope
-steam -shutdown
-killall -9 gamescope

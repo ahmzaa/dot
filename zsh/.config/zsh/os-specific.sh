@@ -18,7 +18,9 @@ if [ $NAME = "shadow" ]; then
     source $ZDOTDIR/hosts/shadow
 fi
 
-if [ $NAME = "i-prefer-linux.roam.internal" ]; then
-    echo "Host is i-prefer-linux.roam.internal"
-    source $ZDOTDIR/hosts/i-prefer-linux.roam.internal
+if [ $NAME = "CW-DYQN400C5P-L" ]; then
+    echo "CW-DYQN400C5P-L"
+    source $ZDOTDIR/hosts/CW-DYQN400C5P-L
 fi
+
+

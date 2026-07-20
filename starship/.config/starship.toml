@@ -7,15 +7,27 @@ right_format = '$all'
 disabled = false
 format = '[$time]($style) '
 time_format = '%R'
+use_12hr = false
+utc_time_offset = "local"
+time_range = "-"
 
 [hostname]
 ssh_only = true
 format = '[$ssh_symbol](bold blue) @ [$hostname](bold red)'
 
+[character]
+success_symbol = "[»](bold green) "
+error_symbol = "[✗](bold red) "
+vicmd_symbol = "[«](bold green) "
+
+[directory]
+format = "[$path]($style) [$read_only]($read_only_style) "
+read_only = " 󰌾"
+
 [aws]
 symbol = '☁️ '
 style = 'peach'
-disabled = false
+disabled = true
 format = '[$symbol($profile )(\($region\) )]($style)'
 
 [git_branch]
@@ -34,10 +46,25 @@ format = 'via [🐋 $context](blue bold)'
 
 [kubernetes]
 symbol = '⚙️ '
-disabled = false
 style = 'sapphire'
-detect_files = ['k8s']
-format = '[$symbol$context( \($namespace\))]($style) '
+disabled = false
+#format = '[$symbol$context( \($namespace\))]($style) '
+format = '[$symbol$context]($style) '
+
+[[kubernetes.contexts]]
+context_pattern = "teleport\\.(?P<region>[\\w-]+)\\..*fleetops.*"
+context_alias	= "$region (fleetops)"
+style = "bold yellow"
+
+[[kubernetes.contexts]]
+context_pattern = "teleport\\.(?P<region>[\\w-]+)\\..*mgmt.*"
+context_alias	= "$region (mgmt)"
+style = "bold purple"
+
+[[kubernetes.contexts]]
+context_pattern = "teleport\\.(?P<region>[\\w-]+)\\..*?-(?P<cluster>.*)"
+context_alias = "$region ($cluster)"
+style = "blue"
 
 [palettes.catppuccin_mocha]
 rosewater = "#f5e0dc"

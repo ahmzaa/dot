@@ -29,6 +29,7 @@
 #----------------------------------------------------------------------
 [ -f "$XDG_CONFIG_HOME/shell/alias" ] && source "$XDG_CONFIG_HOME/shell/alias"
 [ -f "$XDG_CONFIG_HOME/shell/vars" ] && source "$XDG_CONFIG_HOME/shell/vars"
+[ -f "$XDG_CONFIG_HOME/shell/path" ] && source "$XDG_CONFIG_HOME/shell/path"
 
 
 #----------------------------------------------------------------------
@@ -72,7 +73,7 @@ setopt append_history share_history # better history
 setopt hist_ignore_all_dups # ignore duplicate entries
 setopt hist_reduce_blanks # strip extra blanks
 
-HISTFILE="$XDG_CACHE_HOME/.zsh_history"
+HISTFILE="$HOME/.config/zsh/.zsh_history"
 HISTSIZE=100000
 SAVEHIST=100000
 HISTCONTROL=ignoreboth # consecutive duplicates & commands starting with space are not saved
@@ -86,24 +87,6 @@ openfff() {
   zle redisplay
 }
 zle -N openfff
-
-
-#----------------------------------------------------------------------
-# BINDS
-#----------------------------------------------------------------------
-bindkey "^a" beginning-of-line
-bindkey "^e" end-of-line
-bindkey "^k" kill-line
-bindkey "^j" backward-word
-bindkey "^k" forward-word
-bindkey "^H" backward-kill-word
-# ctrl J & K for going up and down in prev commands
-bindkey "^J" history-search-forward
-bindkey "^K" history-search-backward
-bindkey '^R' fzf-history-widget
-
-bindkey '^f' openfff
-
 
 #----------------------------------------------------------------------
 # PLUGINS
@@ -151,16 +134,16 @@ fi
 #----------------------------------------------------------------------
 
 # Load Pywal Colours
-(cat ~/.cache/wal/sequences &)
-typeset -A ZSH_HIGHLIGHT_STYLES
-ZSH_HIGHLIGHT_STYLES[command]='fg=white,bold'
-ZSH_HIGHLIGHT_STYLES[alias]='fg=white,bold'
+#(cat ~/.cache/wal/sequences &)
+#typeset -A ZSH_HIGHLIGHT_STYLES
+#ZSH_HIGHLIGHT_STYLES[command]='fg=white,bold'
+#ZSH_HIGHLIGHT_STYLES[alias]='fg=white,bold'
 
 # Source Host Specific Settings
 source $ZDOTDIR/os-specific.sh
 
 # Generated for envman. Do not edit.
-[ -s "$HOME/.config/envman/load.sh" ] && source "$HOME/.config/envman/load.sh"
+#[ -s "$HOME/.config/envman/load.sh" ] && source "$HOME/.config/envman/load.sh"
 
 # Load Pyenv
 #export PYENV_ROOT="$HOME/.pyenv"
@@ -186,3 +169,20 @@ echo "$(cat $HOME/.config/zsh/banner)" | lolcat # | tte highlight
 # SSH AGENT
 source "$ZDOTDIR/ssh-agent"
 #ssh-cert
+
+#----------------------------------------------------------------------
+# BINDS
+#----------------------------------------------------------------------
+bindkey "^a" beginning-of-line
+bindkey "^e" end-of-line
+bindkey "^k" kill-line
+bindkey "^j" backward-word
+bindkey "^k" forward-word
+bindkey "^H" backward-kill-word
+# ctrl J & K for going up and down in prev commands
+bindkey "^J" history-search-forward
+bindkey "^K" history-search-backward
+bindkey '^R' fzf-history-widget
+
+bindkey '^f' openfff
+

@@ -1,0 +1,19 @@
+source $HOME/coreweave/cw-fleet-tools/setup/source
+source $HOME/coreweave/cw-fleet-tools/setup/shell/source
+
+export PATH=$PATH:$HOME/coreweave/cw-fleet-tools/team/jfields
+
+# CoreWeave Netskope SSL fix — combined CA bundle for Node.js, Go and Python tools (re-run setup.sh to refresh)
+export NODE_EXTRA_CA_CERTS="/Users/hahmed/.certs/ca-bundle.pem"
+export SSL_CERT_FILE="/Users/hahmed/.certs/ca-bundle.pem"
+export REQUESTS_CA_BUNDLE="/Users/hahmed/.certs/ca-bundle.pem"
+source $HOME/coreweave/cw-fleet-tools/setup/source
+
+has(){
+    command -v $1 &> /dev/null
+}
+has cwctl && . <(cwctl completion zsh)
+has kubectl && . <(kubectl completion zsh) && compdef _kubectl kubectl && compdef _kubectl k && compdef _kubectl kubecolor
+has gh && . <(gh completion -s zsh) && compdef _gh gh
+has op && . <(op completion zsh) && compdef _op op
+
