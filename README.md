@@ -9,19 +9,19 @@ Each top-level directory is a Stow package whose contents mirror `$HOME`.
 | Package | Description |
 |---------|-------------|
 | `zsh` | Zsh config, host-specific settings, SSH agent/cert scripts — [README](zsh/.config/zsh/README.md) |
-| `shell` | Shell-agnostic `alias`, `path`, and (gitignored) `vars` |
+| `shell` | Shell-agnostic `alias`, `path`, and (gitignored) `vars` — [README](shell/README.md) |
 | `nvim` | Neovim (lazy.nvim) — [README](nvim/.config/nvim/README.md) |
 | `starship` | [Starship](https://starship.rs) prompt (kubernetes/teleport aware) |
-| `tmux` | tmux config + `tmux-sessionizer` |
+| `tmux` | tmux config + `tmux-sessionizer` — [README](tmux/README.md) |
 | `ghostty` / `foot` | Terminal emulators (macOS / Linux) |
 | `aerospace` | [AeroSpace](https://github.com/nikitabobko/AeroSpace) tiling WM (macOS) |
-| `hypr` | [Hyprland](https://github.com/hyprwm/Hyprland) compositor (Linux) |
+| `hypr` | [Hyprland](https://github.com/hyprwm/Hyprland) compositor (Linux) — [README](hypr/.config/hypr/README.md) |
 | `waybar` / `dunst` / `tofi` / `wal` | Wayland bar, notifications, launcher, pywal (Linux) |
 | `yazi` | [Yazi](https://github.com/sxyazi/yazi) file manager |
 | `rmpc` | Music player client |
 | `opencode` | [opencode](https://opencode.ai) agents & config |
-| `ssh` | Managed `~/.ssh/config` (agent/keychain + CA host) |
-| `bin` | Assorted helper scripts |
+| `ssh` | Managed `~/.ssh/config` (agent/keychain + CA host) — [README](ssh/README.md) |
+| `bin` | Assorted helper scripts — [README](bin/README.md) |
 | `xdg-dirs` | XDG user directory config |
 | `MangoHud` | Gaming HUD (Linux) |
 
