@@ -320,6 +320,20 @@ expand_group() {
     esac
 }
 
+# Comma-separated contents of a group (for display).
+group_contents() {
+    expand_group "$1" | awk 'NR>1{printf ", "}{printf "%s",$0}END{print ""}'
+}
+
+# Print what each offered group contains.
+print_group_legend() {
+    info "Group contents:"
+    printf "    %-16s %s\n" "all" "every package"
+    printf "    %-16s %s\n" "core" "$(group_contents core)"
+    [[ "$OS" == "linux" ]] && printf "    %-16s %s\n" "desktop-linux" "$(group_contents desktop-linux)"
+    [[ "$OS" == "macos" ]] && printf "    %-16s %s\n" "desktop-macos" "$(group_contents desktop-macos)"
+}
+
 # Choose a multi-select tool. Prefer gum, then fzf, else bash select.
 # Sets the global SELECTOR (not echoed) so interactive prompts work — a
 # command-substitution subshell would swallow the confirm prompt.
@@ -339,11 +353,16 @@ pick_selector() {
 SELECTED=()
 select_packages() {
     step "Choose what to install"
+    print_group_legend
 
-    # Build the menu: groups first, then individual packages.
-    local menu=("group:all" "group:core")
-    [[ "$OS" == "linux" ]] && menu+=("group:desktop-linux")
-    [[ "$OS" == "macos" ]] && menu+=("group:desktop-macos")
+    # Build the menu: groups first (with their contents shown), then packages.
+    # Group entries are labelled "group:<name>  (pkg, pkg, ...)"; the leading
+    # "group:<name>" token is parsed back out when expanding.
+    local menu=()
+    menu+=("group:all  (everything)")
+    menu+=("group:core  ($(group_contents core))")
+    [[ "$OS" == "linux" ]] && menu+=("group:desktop-linux  ($(group_contents desktop-linux))")
+    [[ "$OS" == "macos" ]] && menu+=("group:desktop-macos  ($(group_contents desktop-macos))")
     local p
     for p in "${ALL_PACKAGES[@]}"; do menu+=("$p"); done
 
@@ -376,11 +395,14 @@ select_packages() {
 
     [[ ${#chosen[@]} -eq 0 ]] && { error "Nothing selected. Aborting."; exit 1; }
 
-    # Expand groups and de-duplicate.
-    local raw=() c
+    # Expand groups and de-duplicate. A group label looks like
+    # "group:core  (zsh, shell, ...)"; take the first whitespace-delimited
+    # field ("group:core") and strip the "group:" prefix.
+    local raw=() c token
     for c in "${chosen[@]}"; do
         if [[ "$c" == group:* ]]; then
-            while read -r g; do raw+=("$g"); done < <(expand_group "${c#group:}")
+            token="${c%% *}"          # -> group:core
+            while read -r g; do raw+=("$g"); done < <(expand_group "${token#group:}")
         else
             raw+=("$c")
         fi
