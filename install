@@ -40,6 +40,16 @@ REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
 # Every top-level dir except non-stow ones is a package.
 NON_PACKAGES=(docs)
 
+# Print the repo banner (ASCII art) if present.
+print_banner() {
+    local banner="$REPO_DIR/zsh/.config/zsh/banner"
+    if [[ -f "$banner" ]]; then
+        printf "${GREEN}"
+        cat "$banner"
+        printf "${NC}\n"
+    fi
+}
+
 #--------------------------------------------------------------------
 # OS / package-manager detection
 #--------------------------------------------------------------------
@@ -481,6 +491,7 @@ set_default_shell() {
 # Main
 #--------------------------------------------------------------------
 main() {
+    print_banner
     printf "\n${GREEN}Dotfiles installer${NC}\n"
     printf "Repo: %s\n" "$REPO_DIR"
     printf "This will detect your package manager, install dependencies, stow\n"
