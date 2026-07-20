@@ -486,18 +486,23 @@ select_packages() {
 
     # NOTE: use a `while read` loop rather than `mapfile`/`readarray`, which
     # don't exist in bash 3.2 (the default on macOS).
+    info "You can select one or more entries (mix groups and individual packages)."
     case "$SELECTOR" in
         gum)
+            info "Use SPACE/TAB to mark multiple, ENTER to confirm."
             while IFS= read -r line; do [[ -n "$line" ]] && chosen+=("$line"); done \
                 < <(printf '%s\n' "${menu[@]}" | \
-                    gum choose --no-limit --header="Space to select, Enter to confirm" || true) ;;
+                    gum choose --no-limit \
+                        --header="SPACE/TAB = mark, ENTER = confirm" || true) ;;
         fzf)
+            info "Use TAB to mark multiple (a '>' marker appears), ENTER to confirm."
             while IFS= read -r line; do [[ -n "$line" ]] && chosen+=("$line"); done \
                 < <(printf '%s\n' "${menu[@]}" | \
-                    fzf --multi --prompt="select> " \
-                        --header="TAB to select multiple, Enter to confirm" || true) ;;
+                    fzf --multi --marker='> ' --prompt="select (TAB=mark)> " \
+                        --bind 'space:toggle+down' \
+                        --header="TAB or SPACE = mark, ENTER = confirm your marked items" || true) ;;
         select)
-            echo "Enter numbers separated by spaces (e.g. '1 3 5'):"
+            echo "Enter numbers separated by spaces to pick several (e.g. '2 12 15'):"
             local i=1
             for item in "${menu[@]}"; do printf "  %2d) %s\n" "$i" "$item"; i=$((i+1)); done
             local nums reply
