@@ -1,5 +1,11 @@
+# NOTE: we use our own zsh framework (plugins in ~/.zsh/plugins), NOT
+# oh-my-zsh. We deliberately do NOT source setup/shell/source (it loads omz
+# and conflicts with our plugins -> double-wrapped ZLE widgets / FUNCNEST).
+# The flag ~/.cw-fleet-tools/.skip_shell also stops setup/source from
+# auto-loading it. Fleet-tools completions are re-added below.
+# (If `cwft zsh` ever reinstalls oh-my-zsh, re-create the skip flag:
+#   mkdir -p ~/.cw-fleet-tools && touch ~/.cw-fleet-tools/.skip_shell)
 source $HOME/coreweave/cw-fleet-tools/setup/source
-source $HOME/coreweave/cw-fleet-tools/setup/shell/source
 
 export PATH=$PATH:$HOME/coreweave/cw-fleet-tools/team/jfields
 
@@ -7,7 +13,6 @@ export PATH=$PATH:$HOME/coreweave/cw-fleet-tools/team/jfields
 export NODE_EXTRA_CA_CERTS="/Users/hahmed/.certs/ca-bundle.pem"
 export SSL_CERT_FILE="/Users/hahmed/.certs/ca-bundle.pem"
 export REQUESTS_CA_BUNDLE="/Users/hahmed/.certs/ca-bundle.pem"
-source $HOME/coreweave/cw-fleet-tools/setup/source
 
 has(){
     command -v $1 &> /dev/null

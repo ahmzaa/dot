@@ -37,6 +37,7 @@
 #----------------------------------------------------------------------
 ## Load Modules
 zmodload zsh/complist
+[ -d "$HOME/.zsh/plugins/zsh-completions/src" ] && fpath+="$HOME/.zsh/plugins/zsh-completions/src"
 autoload -U compinit && compinit
 autoload -U colors && colors
 
@@ -71,12 +72,12 @@ stty stop undef # disable accidental ctrl s
 setopt append_history share_history # better history
 # on exit, history appends rather than overwrites; history is appended as soon as cmds executed; history shared across sessions
 setopt hist_ignore_all_dups # ignore duplicate entries
+setopt hist_ignore_space # commands starting with a space are not saved
 setopt hist_reduce_blanks # strip extra blanks
 
 HISTFILE="$HOME/.config/zsh/.zsh_history"
 HISTSIZE=100000
 SAVEHIST=100000
-HISTCONTROL=ignoreboth # consecutive duplicates & commands starting with space are not saved
 
 ## OTHER
 autoload -U tetris # tetris in zsh !!
@@ -87,6 +88,27 @@ openfff() {
   zle redisplay
 }
 zle -N openfff
+
+
+#----------------------------------------------------------------------
+# Load
+#----------------------------------------------------------------------
+# Source Host Specific Settings
+source $ZDOTDIR/os-specific.sh
+
+# SSH agent
+source "$ZDOTDIR/ssh-agent"
+
+# SSH certificate check/renewal
+"$ZDOTDIR/ssh-cert"
+
+# Load fzf
+source <(fzf --zsh)
+
+# Load Starship
+eval "$(starship init zsh)"
+echo "$(cat $HOME/.config/zsh/banner)" | lolcat # | tte highlight
+
 
 #----------------------------------------------------------------------
 # BINDS
@@ -101,33 +123,12 @@ bindkey "^H" backward-kill-word
 bindkey "^J" history-search-forward
 bindkey "^K" history-search-backward
 bindkey '^R' fzf-history-widget
-
 bindkey '^f' openfff
-
-#----------------------------------------------------------------------
-# Load
-#----------------------------------------------------------------------
-# Source Host Specific Settings (sets SSH_SK_PROVIDER, CA vars via shell/vars, etc.)
-source $ZDOTDIR/os-specific.sh
-
-# SSH agent (OS-aware: launchd/Keychain on macOS, persistent agent on Linux)
-source "$ZDOTDIR/ssh-agent"
-
-# SSH certificate check/renewal (autodetects certs, non-blocking, needs the agent)
-"$ZDOTDIR/ssh-cert"
-
-# Load fzf
-source <(fzf --zsh)
-
-# Load Starship
-eval "$(starship init zsh)"
-echo "$(cat $HOME/.config/zsh/banner)" | lolcat # | tte highlight
 
 
 #----------------------------------------------------------------------
 # PLUGINS
 #----------------------------------------------------------------------
-
 # Check if the plugin Dir exists
 if [ ! -d "$HOME/.zsh/plugins" ]; then
   mkdir -p $HOME/.zsh/plugins
@@ -141,25 +142,24 @@ else
   git clone https://github.com/zsh-users/zsh-autosuggestions $HOME/.zsh/plugins/zsh-autosuggestions
 fi
 
-# syntax highlighting
-# requires zsh-syntax-highlighting package
-if [ -f "$HOME/.zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]; then
-  source $HOME/.zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-else
-  git clone https://github.com/zsh-users/zsh-syntax-highlighting.git $HOME/.zsh/plugins/zsh-syntax-highlighting
-fi
-
-# zsh-completions
+# zsh-completions (added to $fpath before compinit above; clone if missing)
 # requires https://github.com/zsh-users/zsh-completions
-if [ -f "$HOME/.zsh/plugins/zsh-completions/zsh-completions.plugin.zsh" ]; then
-  source $HOME/.zsh/plugins/zsh-completions/zsh-completions.plugin.zsh
-else
+if [ ! -d "$HOME/.zsh/plugins/zsh-completions" ]; then
   git clone https://github.com/zsh-users/zsh-completions.git $HOME/.zsh/plugins/zsh-completions
 fi
+
 # fzf-tab
 # requires https://github.com/Aloxaf/fzf-tab
 if [ -f "$HOME/.zsh/plugins/fzf-tab/fzf-tab.plugin.zsh" ]; then
   source $HOME/.zsh/plugins/fzf-tab/fzf-tab.plugin.zsh
 else
   git clone https://github.com/Aloxaf/fzf-tab $HOME/.zsh/plugins/fzf-tab
+fi
+
+# syntax highlighting — MUST be sourced last (it wraps all existing widgets)
+# requires zsh-syntax-highlighting package
+if [ -f "$HOME/.zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]; then
+  source $HOME/.zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+else
+  git clone https://github.com/zsh-users/zsh-syntax-highlighting.git $HOME/.zsh/plugins/zsh-syntax-highlighting
 fi

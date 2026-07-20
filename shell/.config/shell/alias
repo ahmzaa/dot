@@ -16,7 +16,7 @@ alias la='lsd -alh --icon=never'
 
 alias grep='rg'
 
-alias find='fd'
+#alias find='fd'
 
 
 #----------------------------------------------------------------------
