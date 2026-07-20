@@ -61,10 +61,11 @@ It will:
 
 - **Detect your OS and package manager** — macOS (Homebrew, auto-installed
   if missing) or Linux (`apt`, `pacman`, or `dnf`).
-- **Install a curated set of core dependencies** — git, stow, zsh, starship,
-  fzf, ripgrep, fd, lsd, lolcat, yazi, tmux.
-- **Let you choose what to stow** via a menu (uses `gum` or `fzf` if
-  available, otherwise a numbered prompt). Pick individual packages or a
+- **Install a curated set of core dependencies** — git, stow, zsh, fzf,
+  ripgrep, fd, lsd, lolcat, tmux (starship, yazi and opencode are installed
+  only if you select their package).
+- **Let you choose what to stow** via a menu (uses `fzf` if available,
+  otherwise a numbered prompt). Pick individual packages or a
   predefined group:
   - `core` — zsh, shell, nvim, starship, tmux, bin, ssh, xdg-dirs, yazi
   - `desktop-linux` — hypr, waybar, dunst, tofi, wal, foot, MangoHud
@@ -73,7 +74,8 @@ It will:
 - **Install per-package dependencies** for your selection (e.g. Hyprland for
   the `hypr` package).
 - **Check neovim** — compares the packaged version against the latest stable
-  release and warns if the packaged one is behind.
+  release; if the packaged one is behind you can install the official
+  prebuilt binary instead (into `~/.local`).
 - **Stow your selection** and, if you agree, **set zsh as your login shell**
   (adding it to `/etc/shells` first when needed).
 

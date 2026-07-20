@@ -362,6 +362,44 @@ pm_nvim_version() {
     esac
 }
 
+# Neovim's own asset naming: nvim-{linux|macos}-{x86_64|arm64}.tar.gz
+nvim_asset() {
+    local arch os
+    case "$(uname -m)" in
+        x86_64|amd64)  arch="x86_64" ;;
+        arm64|aarch64) arch="arm64" ;;
+        *) return 1 ;;
+    esac
+    case "$(uname -s)" in
+        Darwin) os="macos" ;;
+        Linux)  os="linux" ;;
+        *) return 1 ;;
+    esac
+    echo "nvim-${os}-${arch}"
+}
+
+# Install neovim from the official GitHub prebuilt tarball into
+# ~/.local/<asset>/ and symlink bin/nvim into ~/.local/bin (on PATH).
+install_neovim_from_github() {
+    local asset url tmp dest
+    asset="$(nvim_asset)" || return 1
+    url="https://github.com/neovim/neovim/releases/latest/download/${asset}.tar.gz"
+    tmp="$(mktemp -d)"
+    info "Downloading neovim prebuilt binary ($asset)..."
+    if curl -fsSL "$url" -o "$tmp/nvim.tar.gz" && tar -xzf "$tmp/nvim.tar.gz" -C "$tmp"; then
+        dest="$HOME/.local/$asset"
+        rm -rf "$dest"
+        mkdir -p "$HOME/.local" "$HOME/.local/bin"
+        mv "$tmp/$asset" "$dest"
+        ln -sf "$dest/bin/nvim" "$HOME/.local/bin/nvim"
+        rm -rf "$tmp"
+        [[ -x "$HOME/.local/bin/nvim" ]]
+    else
+        rm -rf "$tmp"
+        return 1
+    fi
+}
+
 install_neovim() {
     step "Neovim"
     local gh_ver pm_ver
@@ -379,8 +417,13 @@ install_neovim() {
     fi
     if [[ -z "$pm_ver" ]]; then
         warn "Neovim not offered by $PM. Latest stable is v$gh_ver."
-        info "See https://github.com/neovim/neovim/releases/tag/stable for a prebuilt binary."
-        MANUAL_DEPS+=("neovim (v$gh_ver)")
+        if install_neovim_from_github; then
+            info "Installed neovim v$gh_ver from GitHub."
+        else
+            info "Couldn't install the prebuilt binary automatically."
+            info "  https://github.com/neovim/neovim/releases/tag/stable"
+            MANUAL_DEPS+=("neovim (v$gh_ver)")
+        fi
         return
     fi
 
@@ -393,9 +436,14 @@ install_neovim() {
         if confirm "Install the older packaged version anyway?"; then
             pkg_install neovim
         else
-            info "Skipping. Grab the prebuilt stable binary from:"
-            info "  https://github.com/neovim/neovim/releases/tag/stable"
-            MANUAL_DEPS+=("neovim (v$gh_ver)")
+            info "Installing the latest stable (v$gh_ver) prebuilt binary instead..."
+            if install_neovim_from_github; then
+                info "Installed neovim v$gh_ver from GitHub."
+            else
+                info "Couldn't install the prebuilt binary automatically."
+                info "  https://github.com/neovim/neovim/releases/tag/stable"
+                MANUAL_DEPS+=("neovim (v$gh_ver)")
+            fi
         fi
     fi
 }
@@ -444,19 +492,11 @@ print_group_legend() {
     return 0
 }
 
-# Choose a multi-select tool. Prefer gum, then fzf, else bash select.
-# Sets the global SELECTOR (not echoed) so interactive prompts work — a
-# command-substitution subshell would swallow the confirm prompt.
+# Choose a multi-select tool: fzf if available, else the bash `select`
+# fallback. Sets the global SELECTOR.
 SELECTOR=""
 pick_selector() {
-    if command -v gum >/dev/null 2>&1; then SELECTOR="gum"; return; fi
     if command -v fzf >/dev/null 2>&1; then SELECTOR="fzf"; return; fi
-    # Offer to install gum (except Debian/apt, where we fall back to fzf/select).
-    if [[ "$PM" != "apt" ]] && confirm "Install 'gum' for a nicer selection menu?"; then
-        pkg_install gum
-        command -v gum >/dev/null 2>&1 && { SELECTOR="gum"; return; }
-    fi
-    command -v fzf >/dev/null 2>&1 && { SELECTOR="fzf"; return; }
     SELECTOR="select"
 }
 
@@ -488,14 +528,8 @@ select_packages() {
     # don't exist in bash 3.2 (the default on macOS).
     info "You can select one or more entries (mix groups and individual packages)."
     case "$SELECTOR" in
-        gum)
-            info "Use SPACE/TAB to mark multiple, ENTER to confirm."
-            while IFS= read -r line; do [[ -n "$line" ]] && chosen+=("$line"); done \
-                < <(printf '%s\n' "${menu[@]}" | \
-                    gum choose --no-limit \
-                        --header="SPACE/TAB = mark, ENTER = confirm" || true) ;;
         fzf)
-            info "Use TAB to mark multiple (a '>' marker appears), ENTER to confirm."
+            info "Use TAB or SPACE to mark multiple (a '>' marker appears), ENTER to confirm."
             while IFS= read -r line; do [[ -n "$line" ]] && chosen+=("$line"); done \
                 < <(printf '%s\n' "${menu[@]}" | \
                     fzf --multi --marker='> ' --prompt="select (TAB=mark)> " \
@@ -620,8 +654,8 @@ main() {
     ensure_homebrew
     discover_packages
 
-    # Choose everything first (the only thing that may install beforehand is
-    # gum, if you opt in for a nicer menu), then do all installs together.
+    # Choose everything first (nothing is installed before this), then do
+    # all installs together.
     select_packages
 
     install_core_deps
