@@ -1,0 +1,63 @@
+blacklist = ["scratch"]
+
+dir_length = 2  # Uses last 2 directories: "projects/sesh" instead of just "sesh"
+
+[default_session]
+#startup_command = "nvim -c ':Telescope find_files'"
+preview_command = "ls {}"
+
+[[session]]
+name = "Downloads 📥"
+path = "~/Downloads"
+startup_command = "ls"
+
+[[session]]
+name = "tmux config"
+path = "~/.config/tmux"
+startup_command = "nvim tmux.conf"
+preview_command = "bat ~/.config/tmux/tmux.conf"
+
+[[session]]
+name = "sesh config"
+path = "~/.config/sesh"
+startup_command = "nvim sesh.toml"
+preview_command = "bat ~/.config/sesh/sesh.toml"
+
+[[session]]
+name = "nodes"
+path = "~/nodes"
+startup_command = "ls"
+windows = [ "eu-north-02-mgmt", "eu-north-02-fleet", "us-east-01a-mgmt", "bmaas", "opencode" ]
+
+[[window]]
+name = "opencode"
+startup_script = "opencode"
+
+[[window]]
+name = "claude"
+startup_script = "claude"
+
+[[window]]
+name = "git"
+startup_script = "git pull"
+
+[[window]]
+name = "eu-north-02-mgmt"
+startup_script = "tls eu-north-02a mgmt"
+
+[[window]]
+name = "eu-north-02-fleet"
+startup_script = "tls eu-north-02a fleet"
+
+[[window]]
+name = "us-east-01a-mgmt"
+startup_script = "tl us-east-01a mgmt"
+
+[[window]]
+name = "bmaas"
+startup_script = "hocheck -m -r eu-north-02"
+
+[[wildcard]]
+pattern = "~/prj/**"
+startup_command = "git status"
+preview_command = "git status"

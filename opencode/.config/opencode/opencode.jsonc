@@ -1,5 +1,8 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  "plugin": ["opencode-claude-memory"],
+  "instructions": ["~/.claude/CLAUDE.md"],
+
   "mcp": {
     "glean": {
       "type": "remote",

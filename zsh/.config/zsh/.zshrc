@@ -105,6 +105,9 @@ source "$ZDOTDIR/ssh-agent"
 # Load fzf
 source <(fzf --zsh)
 
+# load zoxide
+eval "$(zoxide init zsh)"
+
 # Load Starship
 eval "$(starship init zsh)"
 echo "$(cat $HOME/.config/zsh/banner)" | lolcat # | tte highlight
@@ -125,6 +128,20 @@ bindkey "^K" history-search-backward
 bindkey '^R' fzf-history-widget
 bindkey '^f' openfff
 
+function sesh-sessions() {
+  {
+    exec </dev/tty
+    exec <&1
+    local session
+    session=$(sesh list -t -c | fzf --height 40% --reverse --border-label ' sesh ' --border --prompt '⚡  ')
+    zle reset-prompt > /dev/null 2>&1 || true
+    [[ -z "$session" ]] && return
+    sesh connect $session
+  }
+}
+
+zle -N sesh-sessions
+bindkey "^s" sesh-sessions
 
 #----------------------------------------------------------------------
 # PLUGINS
