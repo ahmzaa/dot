@@ -38,7 +38,10 @@ MANUAL_DEPS=()
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
 
 # Every top-level dir except non-stow ones is a package.
-NON_PACKAGES=(docs)
+# `work` is a real stow package but is CoreWeave/work-laptop specific, so it is
+# excluded from auto-discovery (and therefore from `all`). It is offered
+# explicitly via the `work` group so only the work machine opts into it.
+NON_PACKAGES=(docs work)
 
 # Print the repo banner (ASCII art) if present.
 print_banner() {
@@ -151,7 +154,7 @@ pkg_install() {
 #--------------------------------------------------------------------
 # Curated core dependencies (installed for every setup)
 #--------------------------------------------------------------------
-CORE_DEPS=(git stow zsh fzf ripgrep fd lsd lolcat tmux)
+CORE_DEPS=(git stow zsh fzf ripgrep fd lsd lolcat tmux zoxide)
 # neovim handled separately (version check).
 # starship and yazi are their own stow packages, so they are installed as
 # per-package dependencies (see pkg_deps / install_selected_deps) rather than
@@ -201,6 +204,56 @@ ensure_cargo() {
     command -v cargo >/dev/null 2>&1
 }
 
+# GOOS/GOARCH-style arch token for the official Go tarball.
+go_tarball_arch() {
+    case "$(uname -m)" in
+        x86_64|amd64)  echo "amd64" ;;
+        arm64|aarch64) echo "arm64" ;;
+        *) return 1 ;;
+    esac
+}
+
+# Ensure a Go toolchain is available (for `go install`-ed MCP servers). Tries
+# PATH, then the package manager, then the official prebuilt tarball into
+# /usr/local/go. Adds go + GOPATH bin to PATH for the rest of this run.
+ensure_go() {
+    command -v go >/dev/null 2>&1 && return 0
+    [[ -x /usr/local/go/bin/go ]] && { export PATH="/usr/local/go/bin:$PATH"; return 0; }
+
+    info "Installing Go toolchain..."
+    case "$PM" in
+        brew)   brew install go ;;
+        apt)    sudo apt install -y golang-go ;;
+        pacman) sudo pacman -S --needed --noconfirm go ;;
+        dnf)    sudo dnf install -y golang ;;
+    esac
+    command -v go >/dev/null 2>&1 && return 0
+
+    # Package manager didn't provide it — fall back to the official tarball.
+    local arch os url tmp
+    arch="$(go_tarball_arch)" || return 1
+    case "$(uname -s)" in
+        Darwin) os="darwin" ;;
+        Linux)  os="linux" ;;
+        *) return 1 ;;
+    esac
+    info "Fetching latest Go from go.dev ($os-$arch)..."
+    local ver
+    ver="$(curl -fsSL https://go.dev/VERSION?m=text 2>/dev/null | head -1)" || return 1
+    [[ -n "$ver" ]] || return 1
+    url="https://go.dev/dl/${ver}.${os}-${arch}.tar.gz"
+    tmp="$(mktemp -d)"
+    if curl -fsSL "$url" -o "$tmp/go.tar.gz"; then
+        sudo rm -rf /usr/local/go
+        sudo tar -C /usr/local -xzf "$tmp/go.tar.gz"
+        rm -rf "$tmp"
+        export PATH="/usr/local/go/bin:$PATH"
+    else
+        rm -rf "$tmp"; return 1
+    fi
+    command -v go >/dev/null 2>&1
+}
+
 install_core_deps() {
     step "Installing core dependencies"
     pkg_install "${CORE_DEPS[@]}"
@@ -218,19 +271,125 @@ install_starship() {
     fi
 }
 
-# opencode isn't in distro repos — install via its official script.
-install_opencode() {
-    if command -v opencode >/dev/null 2>&1; then
-        info "opencode already installed."
-        return 0
-    fi
-    info "Installing opencode via official script..."
-    if curl -fsSL https://opencode.ai/install | bash; then
-        unmark_manual opencode
+# ── opencode MCP servers ─────────────────────────────────────────────────────
+# opencode/.config/opencode/opencode.jsonc wires up two local MCP servers, both
+# Go binaries that ship official GoReleaser prebuilt releases:
+#   engram    -> github.com/Gentleman-Programming/engram  (GitHub releases)
+#   gitea-mcp -> gitea.com/gitea/gitea-mcp                (Gitea releases)
+# We prefer the prebuilt binary (no Go toolchain needed), and fall back to
+# `go install` only if the download fails. Binaries land in ~/.local/bin
+# (already on PATH). Keep in sync with the "mcp" block in opencode.jsonc.
+
+# Extract a single named binary from a downloaded tar.gz into ~/.local/bin.
+# $1 = URL, $2 = binary name inside the archive.
+install_binary_from_targz() {
+    local url="$1" binname="$2" tmp
+    tmp="$(mktemp -d)"
+    if curl -fsSL "$url" -o "$tmp/dl.tar.gz" && tar xzf "$tmp/dl.tar.gz" -C "$tmp"; then
+        mkdir -p "$HOME/.local/bin"
+        find "$tmp" -type f -name "$binname" -exec install -m755 {} "$HOME/.local/bin/" \;
+        rm -rf "$tmp"
+        [[ -x "$HOME/.local/bin/$binname" ]]
     else
-        warn "Could not install opencode automatically."
-        MANUAL_DEPS+=("opencode")
+        rm -rf "$tmp"; return 1
     fi
+}
+
+# engram prebuilt: asset is engram_<version>_<goos>_<goarch>.tar.gz (version in
+# the name, so we resolve the latest tag first). goos/goarch are lowercase.
+install_engram() {
+    command -v engram >/dev/null 2>&1 && { info "engram already installed."; unmark_manual engram; return 0; }
+
+    local arch os ver url
+    case "$(uname -m)" in
+        x86_64|amd64)  arch="amd64" ;;
+        arm64|aarch64) arch="arm64" ;;
+        *) arch="" ;;
+    esac
+    case "$(uname -s)" in
+        Darwin) os="darwin" ;;
+        Linux)  os="linux" ;;
+        *) os="" ;;
+    esac
+    if [[ -n "$arch" && -n "$os" ]]; then
+        ver="$(curl -fsSL https://api.github.com/repos/Gentleman-Programming/engram/releases/latest 2>/dev/null \
+               | sed -nE 's/.*"tag_name": *"v?([^"]+)".*/\1/p' | head -1)"
+        if [[ -n "$ver" ]]; then
+            url="https://github.com/Gentleman-Programming/engram/releases/latest/download/engram_${ver}_${os}_${arch}.tar.gz"
+            info "Downloading engram v$ver prebuilt binary ($os/$arch)..."
+            if install_binary_from_targz "$url" engram; then
+                unmark_manual engram; return 0
+            fi
+        fi
+    fi
+
+    info "Prebuilt engram unavailable — trying 'go install'..."
+    if ensure_go && go install github.com/Gentleman-Programming/engram/cmd/engram@latest; then
+        unmark_manual engram; return 0
+    fi
+    warn "Could not install engram automatically."
+    MANUAL_DEPS+=("engram (see github.com/Gentleman-Programming/engram)")
+    return 1
+}
+
+# gitea-mcp prebuilt: asset is gitea-mcp_<OS>_<arch>.tar.gz (GoReleaser naming,
+# same scheme as sesh — reuse goreleaser_os_arch()). Gitea has no
+# /releases/latest/download/ shortcut, so resolve the tag via the API and build
+# the explicit /releases/download/<tag>/ URL.
+install_gitea_mcp() {
+    command -v gitea-mcp >/dev/null 2>&1 && { info "gitea-mcp already installed."; unmark_manual gitea-mcp; return 0; }
+
+    local osarch tag url
+    if osarch="$(goreleaser_os_arch)"; then
+        tag="$(curl -fsSL 'https://gitea.com/api/v1/repos/gitea/gitea-mcp/releases?limit=1' 2>/dev/null \
+               | sed -nE 's/.*"tag_name":"([^"]+)".*/\1/p' | head -1)"
+        if [[ -n "$tag" ]]; then
+            url="https://gitea.com/gitea/gitea-mcp/releases/download/${tag}/gitea-mcp_${osarch}.tar.gz"
+            info "Downloading gitea-mcp $tag prebuilt binary ($osarch)..."
+            if install_binary_from_targz "$url" gitea-mcp; then
+                unmark_manual gitea-mcp; return 0
+            fi
+        fi
+    fi
+
+    info "Prebuilt gitea-mcp unavailable — trying 'go install'..."
+    if ensure_go && go install gitea.com/gitea/gitea-mcp@latest; then
+        unmark_manual gitea-mcp; return 0
+    fi
+    warn "Could not install gitea-mcp automatically."
+    MANUAL_DEPS+=("gitea-mcp (see gitea.com/gitea/gitea-mcp)")
+    return 1
+}
+
+install_opencode_mcps() {
+    step "Installing opencode MCP servers"
+    install_engram
+    install_gitea_mcp
+
+    # Let engram wire up its own opencode plugin/tui files (idempotent — it
+    # regenerates plugins/engram.ts + tui.json, and does NOT create a duplicate
+    # opencode.json when opencode.jsonc already defines the engram MCP block).
+    if command -v engram >/dev/null 2>&1; then
+        info "Running 'engram setup opencode'..."
+        engram setup opencode || warn "engram setup opencode failed — plugin already stowed from dotfiles, continuing."
+    fi
+}
+
+install_opencode() {
+    if ! command -v opencode >/dev/null 2>&1; then
+        info "Installing opencode via official script..."
+        if curl -fsSL https://opencode.ai/install | bash; then
+            unmark_manual opencode
+        else
+            warn "Could not install opencode automatically."
+            MANUAL_DEPS+=("opencode")
+        fi
+    else
+        info "opencode already installed."
+    fi
+
+    # opencode is configured with local MCP servers — install them too.
+    install_opencode_mcps
 }
 
 # Rust target triple for prebuilt-binary downloads (yazi et al.).
@@ -300,6 +459,74 @@ install_yazi() {
     warn "Could not install yazi automatically."
 }
 
+# GoReleaser-style OS/arch tokens for sesh's release assets, which are named
+# sesh_<OS>_<arch>.tar.gz (e.g. sesh_Linux_x86_64.tar.gz, sesh_Darwin_arm64.tar.gz).
+# NOTE: this differs from target_triple() (Rust) — sesh keeps x86_64 but uses
+# arm64 (not aarch64) and capitalised OS names.
+goreleaser_os_arch() {
+    local arch os
+    case "$(uname -m)" in
+        x86_64|amd64)  arch="x86_64" ;;
+        arm64|aarch64) arch="arm64" ;;
+        i386|i686)     arch="i386" ;;
+        *) return 1 ;;
+    esac
+    case "$(uname -s)" in
+        Darwin) os="Darwin" ;;
+        Linux)  os="Linux" ;;
+        *) return 1 ;;
+    esac
+    echo "${os}_${arch}"
+}
+
+# Install sesh from the official GitHub prebuilt binary (no Go toolchain needed).
+# Assets: sesh_<OS>_<arch>.tar.gz containing a top-level `sesh` binary.
+install_sesh_from_github() {
+    local osarch url tmp
+    osarch="$(goreleaser_os_arch)" || return 1
+    url="https://github.com/joshmedeski/sesh/releases/latest/download/sesh_${osarch}.tar.gz"
+    tmp="$(mktemp -d)"
+    info "Downloading sesh prebuilt binary ($osarch)..."
+    if curl -fsSL "$url" -o "$tmp/sesh.tar.gz" && tar xzf "$tmp/sesh.tar.gz" -C "$tmp"; then
+        mkdir -p "$HOME/.local/bin"
+        find "$tmp" -type f -name sesh -exec install -m755 {} "$HOME/.local/bin/" \;
+        rm -rf "$tmp"
+        command -v sesh >/dev/null 2>&1 || [[ -x "$HOME/.local/bin/sesh" ]]
+    else
+        rm -rf "$tmp"
+        return 1
+    fi
+}
+
+install_sesh() {
+    if command -v sesh >/dev/null 2>&1; then
+        info "sesh already installed."
+        unmark_manual sesh; return 0
+    fi
+
+    # sesh is packaged on Homebrew core; elsewhere (apt/dnf/pacman) it is not,
+    # so try brew directly, then fall back to the prebuilt GitHub binary, then
+    # to `go install`. (Runtime deps tmux + zoxide are both in CORE_DEPS.)
+    if [[ "$PM" == "brew" ]]; then
+        if brew install sesh; then unmark_manual sesh; return 0; fi
+    fi
+
+    info "sesh not available via $PM — trying prebuilt binary..."
+    if install_sesh_from_github; then
+        unmark_manual sesh; return 0
+    fi
+
+    if command -v go >/dev/null 2>&1; then
+        info "Falling back to 'go install' for sesh..."
+        if go install github.com/joshmedeski/sesh/v2@latest; then
+            unmark_manual sesh; return 0
+        fi
+    fi
+
+    warn "Could not install sesh automatically."
+    MANUAL_DEPS+=("sesh")
+}
+
 #--------------------------------------------------------------------
 # Per-package extra dependencies (installed only when selected)
 #--------------------------------------------------------------------
@@ -335,6 +562,13 @@ install_selected_deps() {
     if selected_has starship; then step "Installing starship"; install_starship; fi
     if selected_has yazi;     then step "Installing yazi";     install_yazi;     fi
     if selected_has opencode; then step "Installing opencode"; install_opencode; fi
+    if selected_has sesh;     then step "Installing sesh";     install_sesh;     fi
+
+    # The `work` package pulls in sesh (it ships a sesh.toml) but isn't the sesh
+    # package itself, so install the sesh binary for it too.
+    if selected_has work && ! selected_has sesh; then
+        step "Installing sesh (for work package)"; install_sesh
+    fi
 }
 
 # True if a package is in the SELECTED list.
@@ -464,15 +698,18 @@ discover_packages() {
 }
 
 # Predefined groups
-GROUP_CORE=(zsh shell nvim starship tmux bin ssh xdg-dirs yazi)
+GROUP_CORE=(zsh shell nvim starship tmux bin ssh xdg-dirs yazi sesh)
 GROUP_DESKTOP_LINUX=(hypr waybar dunst tofi wal foot MangoHud)
 GROUP_DESKTOP_MACOS=(aerospace ghostty)
+# Work-laptop-only package (CoreWeave). Excluded from `all`; opt-in via this group.
+GROUP_WORK=(work)
 
 expand_group() {
     case "$1" in
         core)          printf '%s\n' "${GROUP_CORE[@]}" ;;
         desktop-linux) printf '%s\n' "${GROUP_DESKTOP_LINUX[@]}" ;;
         desktop-macos) printf '%s\n' "${GROUP_DESKTOP_MACOS[@]}" ;;
+        work)          printf '%s\n' "${GROUP_WORK[@]}" ;;
         all)           printf '%s\n' "${ALL_PACKAGES[@]}" ;;
     esac
 }
@@ -485,10 +722,11 @@ group_contents() {
 # Print what each offered group contains.
 print_group_legend() {
     info "Group contents:"
-    printf "    %-16s %s\n" "all" "every package"
+    printf "    %-16s %s\n" "all" "every package (excludes work)"
     printf "    %-16s %s\n" "core" "$(group_contents core)"
     [[ "$OS" == "linux" ]] && printf "    %-16s %s\n" "desktop-linux" "$(group_contents desktop-linux)"
     [[ "$OS" == "macos" ]] && printf "    %-16s %s\n" "desktop-macos" "$(group_contents desktop-macos)"
+    printf "    %-16s %s\n" "work" "$(group_contents work)  (CoreWeave work laptop)"
     return 0
 }
 
@@ -509,10 +747,11 @@ select_packages() {
     # Group entries are labelled "group:<name>  (pkg, pkg, ...)"; the leading
     # "group:<name>" token is parsed back out when expanding.
     local menu=()
-    menu+=("group:all  (everything)")
+    menu+=("group:all  (everything, excludes work)")
     menu+=("group:core  ($(group_contents core))")
     [[ "$OS" == "linux" ]] && menu+=("group:desktop-linux  ($(group_contents desktop-linux))")
     [[ "$OS" == "macos" ]] && menu+=("group:desktop-macos  ($(group_contents desktop-macos))")
+    menu+=("group:work  ($(group_contents work))")
     local p
     for p in "${ALL_PACKAGES[@]}"; do menu+=("$p"); done
 
@@ -567,6 +806,16 @@ select_packages() {
         SELECTED+=("$item"); seen+="$item "
     done
 
+    # The `work` package ships a full ~/.config/sesh/sesh.toml (base + CoreWeave
+    # nodes). It would collide with the base `sesh` package's sesh.toml, so when
+    # both are selected, drop base `sesh` and let `work` own that file.
+    if [[ "$seen" == *" work "* && "$seen" == *" sesh "* ]]; then
+        warn "'work' provides sesh.toml (base + CoreWeave nodes); dropping base 'sesh' to avoid a stow conflict."
+        local filtered=() s
+        for s in "${SELECTED[@]}"; do [[ "$s" == "sesh" ]] || filtered+=("$s"); done
+        SELECTED=("${filtered[@]}")
+    fi
+
     info "Will stow: ${SELECTED[*]}"
 }
 
@@ -591,6 +840,19 @@ backup_conflicts() {
 
 stow_packages() {
     step "Stowing packages"
+
+    # The `work` package provides ~/.config/sesh/sesh.toml (base + CoreWeave
+    # nodes), which collides with the base `sesh` package. If we're about to
+    # stow `work`, make sure base `sesh` isn't stowed first — otherwise stow
+    # aborts on the symlink conflict (backup_conflicts skips symlinks). This
+    # also covers the case where `sesh` was stowed on an earlier install run.
+    if printf '%s\n' "${SELECTED[@]}" | grep -qx "work"; then
+        if [[ -L "$HOME/.config/sesh/sesh.toml" ]]; then
+            info "Unstowing base 'sesh' so 'work' can own ~/.config/sesh/sesh.toml"
+            ( cd "$REPO_DIR" && stow -D sesh ) 2>/dev/null || true
+        fi
+    fi
+
     local pkg
     for pkg in "${SELECTED[@]}"; do
         if [[ ! -d "$REPO_DIR/$pkg" ]]; then
