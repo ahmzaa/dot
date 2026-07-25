@@ -9,10 +9,15 @@ Cross-platform zsh setup. Plugins are managed manually (cloned into
 |------|---------|
 | `.zshrc` | Main interactive config (completion, options, plugins, binds) |
 | `.zshenv` | Env exports, `typeset -U path fpath` |
-| `os-specific.sh` | Detects OS/hostname and sources the matching `hosts/` file |
-| `hosts/` | Per-host config (`mac`, `shadow`, `cloudtop`, `CW-DYQN400C5P-L`, …) |
+| `os-specific.sh` | Detects OS/hostname and sources the matching `hosts/` file (guarded — missing files are skipped) |
+| `hosts/` | Per-host config (`mac`, `shadow`, `cloudtop`, …) |
 | `ssh-agent` | OS-aware agent bootstrap (macOS Keychain / Linux persistent agent) |
 | `ssh-cert` | SSH certificate expiry check + auto-renewal (see [docs](../../../docs/ssh-cert-setup.md)) |
+
+> The work host file `hosts/CW-DYQN400C5P-L` lives in the separate **`work`**
+> Stow package (not this one) so work-specific config stays isolated. When
+> `work` is stowed it lands in `hosts/` alongside the others. See the
+> [top-level README](../../../README.md#the-work-package).
 
 Shell-agnostic pieces live in the `shell` package (`shell/.config/shell/`):
 `alias`, `path`, and a gitignored `vars`.

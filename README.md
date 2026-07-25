@@ -18,12 +18,14 @@ Each top-level directory is a Stow package whose contents mirror `$HOME`.
 | `hypr` | [Hyprland](https://github.com/hyprwm/Hyprland) compositor (Linux) — [README](hypr/.config/hypr/README.md) |
 | `waybar` / `dunst` / `tofi` / `wal` | Wayland bar, notifications, launcher, pywal (Linux) |
 | `yazi` | [Yazi](https://github.com/sxyazi/yazi) file manager |
+| `sesh` | [sesh](https://github.com/joshmedeski/sesh) tmux session manager |
 | `rmpc` | Music player client |
-| `opencode` | [opencode](https://opencode.ai) agents & config |
+| `opencode` | [opencode](https://opencode.ai) agents, config & MCP servers (engram, gitea-mcp) |
 | `ssh` | Managed `~/.ssh/config` (agent/keychain + CA host) — [README](ssh/README.md) |
 | `bin` | Assorted helper scripts — [README](bin/README.md) |
 | `xdg-dirs` | XDG user directory config |
 | `MangoHud` | Gaming HUD (Linux) |
+| `work` | Work-laptop-only overrides (opt-in; gitignored secrets) — see [Host-specific config](#host-specific-config) |
 
 ## Requirements
 
@@ -34,11 +36,16 @@ Each top-level directory is a Stow package whose contents mirror `$HOME`.
 **Common CLI tools**
 - [starship](https://starship.rs), [fzf](https://github.com/junegunn/fzf), [ripgrep](https://github.com/BurntSushi/ripgrep), [fd](https://github.com/sharkdp/fd)
 - [lsd](https://github.com/lsd-rs/lsd), [lolcat](https://github.com/busyloop/lolcat), [yazi](https://github.com/sxyazi/yazi)
+- [zoxide](https://github.com/ajeetdsouza/zoxide) (smart `cd`, used by `.zshrc` and `sesh`)
 - [neovim](https://github.com/neovim/neovim) (uses [lazy.nvim](https://github.com/folke/lazy.nvim))
 
 The `install` script installs these for you. Zsh plugins are also cloned
 automatically on first shell start into `~/.zsh/plugins`
 (zsh-autosuggestions, zsh-syntax-highlighting, zsh-completions, fzf-tab).
+
+Shell-integrated tools (`fzf`, `zoxide`, `starship`) are loaded conditionally in
+`.zshrc`; if any are missing you'll see a single `⚠ missing tools:` line at
+shell startup instead of an error — run `./install` to fix.
 
 ## Install
 
@@ -62,17 +69,19 @@ It will:
 - **Detect your OS and package manager** — macOS (Homebrew, auto-installed
   if missing) or Linux (`apt`, `pacman`, or `dnf`).
 - **Install a curated set of core dependencies** — git, stow, zsh, fzf,
-  ripgrep, fd, lsd, lolcat, tmux (starship, yazi and opencode are installed
-  only if you select their package).
+  ripgrep, fd, lsd, lolcat, tmux, zoxide (starship, yazi, sesh and opencode
+  are installed only if you select their package).
 - **Let you choose what to stow** via a menu (uses `fzf` if available,
   otherwise a numbered prompt). Pick individual packages or a
   predefined group:
-  - `core` — zsh, shell, nvim, starship, tmux, bin, ssh, xdg-dirs, yazi
+  - `core` — zsh, shell, nvim, starship, tmux, bin, ssh, xdg-dirs, yazi, sesh
   - `desktop-linux` — hypr, waybar, dunst, tofi, wal, foot, MangoHud
   - `desktop-macos` — aerospace, ghostty
-  - `all` — everything
+  - `work` — the `work` package (CoreWeave laptop; opt-in, excluded from `all`)
+  - `all` — everything except `work`
 - **Install per-package dependencies** for your selection (e.g. Hyprland for
-  the `hypr` package).
+  the `hypr` package, the sesh binary for `sesh`, or the engram + gitea-mcp
+  MCP servers for `opencode`).
 - **Check neovim** — compares the packaged version against the latest stable
   release; if the packaged one is behind you can install the official
   prebuilt binary instead (into `~/.local`).
@@ -95,8 +104,49 @@ chsh -s "$(command -v zsh)"
 ## Host-specific config
 
 `zsh` detects the OS and hostname (`zsh/.config/zsh/os-specific.sh`) and sources
-a matching file from `zsh/.config/zsh/hosts/`. See the
+a matching file from `zsh/.config/zsh/hosts/` (each source is guarded so a
+missing host file is a no-op). See the
 [zsh README](zsh/.config/zsh/README.md) for details.
+
+### The `work` package
+
+Work-laptop-only configuration is isolated in its own Stow package so the rest
+of the repo stays generic. It is **excluded from `all`** and only installed if
+you explicitly pick the `work` group.
+
+```sh
+stow work        # on the work laptop only
+```
+
+It provides:
+
+- `work/.config/zsh/hosts/CW-DYQN400C5P-L` — the work host file (sourced by
+  `os-specific.sh` on that hostname). Sources `~/.config/work/secrets`, exports
+  `OPENCODE_CONFIG` (see below), and sets up fleet tooling.
+- `work/.config/opencode/opencode.work.jsonc` — an **overlay** layered on top of
+  the base opencode config via `OPENCODE_CONFIG`. opencode merges configs, so
+  the base MCP servers stay active and work-only servers are added. Internal
+  URLs come from `{env:...}` vars defined in the secrets file.
+- `work/.config/sesh/sesh.toml` — a full sesh config (base + work sessions).
+  Because sesh reads a single file, on the work laptop you stow `work` but **not**
+  the base `sesh` package (the installer drops `sesh` automatically if you pick
+  both).
+- `work/.config/work/secrets` — **gitignored**; holds internal URLs/tokens. Copy
+  `secrets.example` to `secrets` and fill it in on the work machine.
+
+### opencode & MCP servers
+
+The `opencode` package ships the config, agents, plugins, and two local MCP
+servers referenced by `opencode.jsonc`:
+
+- [engram](https://github.com/Gentleman-Programming/engram) — persistent memory
+- [gitea-mcp](https://gitea.com/gitea/gitea-mcp) — Gitea integration
+
+Selecting `opencode` in the installer installs opencode itself, then downloads
+the official prebuilt binaries for both MCP servers into `~/.local/bin`
+(falling back to `go install`), and runs `engram setup opencode` to wire up the
+engram plugin. Both servers are referenced by bare command name, so they resolve
+from `PATH` on any machine.
 
 ## Docs
 
