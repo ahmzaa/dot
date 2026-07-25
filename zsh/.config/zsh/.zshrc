@@ -102,15 +102,44 @@ source "$ZDOTDIR/ssh-agent"
 # SSH certificate check/renewal
 "$ZDOTDIR/ssh-cert"
 
-# Load fzf
-source <(fzf --zsh)
+# Tool init helpers: run a tool's shell-init only if it's installed, and
+# record any missing tools so we can warn ONCE at the end of startup. This
+# keeps the shell resilient (no errors from a missing binary) while still
+# surfacing what needs installing (run ./install to fix).
+typeset -ga _MISSING_TOOLS
+_init_tool() {
+    # $1 = binary name, $2... = command that emits the init script
+    if command -v "$1" >/dev/null 2>&1; then
+        shift
+        eval "$("$@")"
+    else
+        _MISSING_TOOLS+=("$1")
+    fi
+}
 
-# load zoxide
-eval "$(zoxide init zsh)"
+# Load fzf
+_init_tool fzf fzf --zsh
+
+# Load zoxide
+_init_tool zoxide zoxide init zsh
 
 # Load Starship
-eval "$(starship init zsh)"
-echo "$(cat $HOME/.config/zsh/banner)" | lolcat # | tte highlight
+_init_tool starship starship init zsh
+
+# Banner (fall back to plain output if lolcat isn't installed)
+if command -v lolcat >/dev/null 2>&1; then
+    cat "$HOME/.config/zsh/banner" | lolcat # | tte highlight
+else
+    cat "$HOME/.config/zsh/banner"
+    _MISSING_TOOLS+=(lolcat)
+fi
+
+# Warn once if any shell-integrated tools are missing.
+if (( ${#_MISSING_TOOLS[@]} )); then
+    print -P "%F{yellow}⚠ missing tools:%f ${_MISSING_TOOLS[*]} %F{242}(run ~/dot/install to fix)%f"
+fi
+unset -f _init_tool
+unset _MISSING_TOOLS
 
 
 #----------------------------------------------------------------------
