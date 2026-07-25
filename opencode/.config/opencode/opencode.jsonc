@@ -1,40 +1,25 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "plugin": ["opencode-claude-memory"],
-  "instructions": ["~/.claude/CLAUDE.md"],
-
+  "lsp": true,
   "mcp": {
-    "glean": {
-      "type": "remote",
-      "url": "https://coreweave-be.glean.com/mcp/default"
+    "engram": {
+      "enabled": true,
+      "type": "local",
+      "command": [
+        "engram",
+        "mcp",
+        "--tools=agent"
+      ]
     },
-    "atlassian": {
-      "type": "remote",
-      "url": "https://mcp.atlassian.com/v1/mcp"
-    },
-    "sourcegraph": {
-      "type": "remote",
-      "url": "https://coreweave.sourcegraphcloud.com/.api/mcp"
-    },
-    "mission-control-mcp": {
-      "type": "remote",
-      "url": "https://mission-control.us-west.core-internal.ingress.int.coreweave.com/mcp"
-    },
-    "crwv-docs": {
-      "type": "remote",
-      "url": "https://docs.coreweave.com/mcp"
-    },
-    "wandb-docs": {
-      "type": "remote",
-      "url": "https://docs.wandb.ai/mcp"
-    },
-    "github": {
-      "type": "remote",
-      "url": "https://api.githubcopilot.com/mcp",
-      "oauth": false,
-      "headers": {
-        "Authorization": "Bearer {env:GITHUB_TOKEN}"
-      }
+    "gitea-mcp": {
+      "enabled": true,
+      "type": "local",
+      "command": [
+        "gitea-mcp",
+        "-t", "stdio",
+        "-H", "https://tea.ahmza.com",
+        "-T", "{env:GITEA_TOKEN}"
+      ]
     }
   }
 }
