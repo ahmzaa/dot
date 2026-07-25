@@ -8,3 +8,6 @@ export PATH=$PATH:/usr/local/go/bin
 export PATH=$PATH:$HOME/go/bin
 export PATH=$PATH:$HOME/.cargo/bin
 . "$HOME/.cargo/env"
+
+# opencode
+export PATH=/home/ahmza/.opencode/bin:$PATH
