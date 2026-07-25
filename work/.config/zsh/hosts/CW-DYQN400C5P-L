@@ -9,6 +9,21 @@ source $HOME/coreweave/cw-fleet-tools/setup/source
 
 export PATH=$PATH:$HOME/coreweave/cw-fleet-tools/team/jfields
 
+# Internal endpoints / secrets (gitignored). Must be sourced BEFORE opencode
+# reads its config so the {env:CW_*_URL} substitutions in opencode.work.jsonc
+# resolve. Copy secrets.example -> secrets and fill in real values.
+[ -f "$HOME/.config/work/secrets" ] && source "$HOME/.config/work/secrets"
+
+# opencode: layer the CoreWeave work overlay on top of the base config.
+# The base ~/.config/opencode/opencode.jsonc stays agnostic (engram, gitea, lsp);
+# this overlay (from the `work` stow package) adds the CoreWeave-only MCP
+# servers. OpenCode merges the two.
+export OPENCODE_CONFIG="$HOME/.config/opencode/opencode.work.jsonc"
+
+# NOTE: sesh — on this host we stow the `work` package but NOT the base `sesh`
+# package, so ~/.config/sesh/sesh.toml comes straight from work/ (base + the
+# CoreWeave "nodes" session). No symlink swap needed.
+
 # CoreWeave Netskope SSL fix — combined CA bundle for Node.js, Go and Python tools (re-run setup.sh to refresh)
 export NODE_EXTRA_CA_CERTS="/Users/hahmed/.certs/ca-bundle.pem"
 export SSL_CERT_FILE="/Users/hahmed/.certs/ca-bundle.pem"

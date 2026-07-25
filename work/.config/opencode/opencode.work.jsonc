@@ -1,0 +1,51 @@
+{
+  // ─────────────────────────────────────────────────────────────────────────
+  // CoreWeave work overlay — part of the `work` stow package.
+  //
+  // Layered ON TOP of the base ~/.config/opencode/opencode.jsonc via the
+  // OPENCODE_CONFIG env var, which is exported only on the work host
+  // (see work/.config/zsh/hosts/CW-DYQN400C5P-L). OpenCode merges configs, so
+  // the base engram + gitea MCP servers stay active and these are added.
+  //
+  // Internal URLs are NOT committed: each is pulled from an env var defined in
+  // the gitignored work secrets file (work/.config/work/secrets). If a var is
+  // unset, {env:...} resolves to an empty string and that server is effectively
+  // inert.
+  // ─────────────────────────────────────────────────────────────────────────
+  "$schema": "https://opencode.ai/config.json",
+
+  "mcp": {
+    "glean": {
+      "type": "remote",
+      "url": "{env:CW_GLEAN_URL}"
+    },
+    "atlassian": {
+      "type": "remote",
+      "url": "{env:CW_ATLASSIAN_URL}"
+    },
+    "sourcegraph": {
+      "type": "remote",
+      "url": "{env:CW_SOURCEGRAPH_URL}"
+    },
+    "mission-control-mcp": {
+      "type": "remote",
+      "url": "{env:CW_MISSION_CONTROL_URL}"
+    },
+    "crwv-docs": {
+      "type": "remote",
+      "url": "{env:CW_DOCS_URL}"
+    },
+    "wandb-docs": {
+      "type": "remote",
+      "url": "{env:CW_WANDB_DOCS_URL}"
+    },
+    "github": {
+      "type": "remote",
+      "url": "{env:CW_GITHUB_MCP_URL}",
+      "oauth": false,
+      "headers": {
+        "Authorization": "Bearer {env:GITHUB_TOKEN}"
+      }
+    }
+  }
+}

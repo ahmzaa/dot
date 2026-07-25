@@ -1,0 +1,69 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# sesh config for the CoreWeave work laptop — part of the `work` stow package.
+#
+# sesh reads a SINGLE config file (no include/merge), so this is the full base
+# config (kept in sync with sesh/.config/sesh/sesh.toml) PLUS the CoreWeave-only
+# "nodes" session and node windows.
+#
+# On the work host you stow `work` but NOT the base `sesh` package, so this file
+# lands at ~/.config/sesh/sesh.toml directly. Keep the shared parts in sync with
+# the base sesh.toml.
+# ─────────────────────────────────────────────────────────────────────────────
+blacklist = ["scratch"]
+
+dir_length = 2  # Uses last 2 directories: "projects/sesh" instead of just "sesh"
+
+[default_session]
+#startup_command = "nvim -c ':Telescope find_files'"
+preview_command = "ls {}"
+
+[[session]]
+name = "dotfiles"
+path = "~/dot"
+startup_command = "nvim -c ':Telescope find_files'"
+preview_command = "ls {}"
+
+[[session]]
+name = "nodes"
+path = "~/nodes"
+startup_command = "ls"
+windows = [ "eu-north-02-mgmt", "eu-north-02-fleet", "us-east-01a-mgmt", "bmaas", "opencode" ]
+
+[[session]]
+name = "projects"
+path = "~/prj"
+startup_command = "ls"
+windows = [ 'opencode' ]
+
+[[window]]
+name = "opencode"
+startup_script = "opencode"
+
+[[window]]
+name = "claude"
+startup_script = "claude"
+
+[[window]]
+name = "git"
+startup_script = "git pull"
+
+[[window]]
+name = "eu-north-02-mgmt"
+startup_script = "tls eu-north-02a mgmt"
+
+[[window]]
+name = "eu-north-02-fleet"
+startup_script = "tls eu-north-02a fleet"
+
+[[window]]
+name = "us-east-01a-mgmt"
+startup_script = "tl us-east-01a mgmt"
+
+[[window]]
+name = "bmaas"
+startup_script = "hocheck -m -r eu-north-02"
+
+[[wildcard]]
+pattern = "~/prj/**"
+startup_command = "git status"
+preview_command = "git status"
