@@ -154,7 +154,7 @@ pkg_install() {
 #--------------------------------------------------------------------
 # Curated core dependencies (installed for every setup)
 #--------------------------------------------------------------------
-CORE_DEPS=(git stow zsh fzf ripgrep fd lsd lolcat tmux zoxide)
+CORE_DEPS=(git stow zsh fzf ripgrep fd lsd lolcat tmux sesh zoxide)
 # neovim handled separately (version check).
 # starship and yazi are their own stow packages, so they are installed as
 # per-package dependencies (see pkg_deps / install_selected_deps) rather than
