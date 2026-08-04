@@ -11,3 +11,5 @@ export PATH=$PATH:$HOME/.cargo/bin
 
 # opencode
 export PATH=/home/ahmza/.opencode/bin:$PATH
+
+source /usr/share/nvm/init-nvm.sh
