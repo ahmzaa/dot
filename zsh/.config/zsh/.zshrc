@@ -93,8 +93,6 @@ zle -N openfff
 #----------------------------------------------------------------------
 # Load
 #----------------------------------------------------------------------
-# Source Host Specific Settings
-source $ZDOTDIR/os-specific.sh
 
 # SSH agent
 source "$ZDOTDIR/ssh-agent"
@@ -141,6 +139,8 @@ fi
 unset -f _init_tool
 unset _MISSING_TOOLS
 
+# Source Host Specific Settings
+source $ZDOTDIR/os-specific.sh
 
 #----------------------------------------------------------------------
 # BINDS
