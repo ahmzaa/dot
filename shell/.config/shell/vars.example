@@ -1,0 +1,30 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Shell environment / secrets — EXAMPLE template.
+#
+# Copy this to `vars` (same dir) and fill in real values. The real `vars` file
+# is gitignored so tokens never hit git.
+#
+#     cp vars.example vars   # then fill in
+#
+# Sourced by zsh/.config/zsh/.zshrc as "$XDG_CONFIG_HOME/shell/vars", guarded
+# by [ -f ], so a bare checkout without this file still starts a working shell.
+# Every var below is therefore optional — an unset var degrades one feature
+# rather than breaking the shell.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Rust toolchain, if installed via rustup.
+. "$HOME/.cargo/env"
+
+# Consumed by opencode's gitea MCP server (opencode.jsonc, passed as -T).
+# Unset means that server runs unauthenticated.
+export GITEA_TOKEN="<gitea-personal-access-token>"
+
+# Used by external tooling rather than anything in this repo, so grepping the
+# repo for these will come up empty — that is expected.
+export GRAFANA_TOKEN="<grafana-service-account-token>"
+export ATLASSIAN_API_TOKEN="<atlassian-api-token>"
+
+# SSH certificate renewal — see docs/ssh-cert-setup.md and zsh/.config/zsh/ssh-cert.
+# Both must be set or renewal is skipped with a warning.
+export SSH_CA_HOST="<ca-host-or-ip>"   # CA hostname / IP
+export SSH_CA_USER="<your-login>"      # principal to sign for
