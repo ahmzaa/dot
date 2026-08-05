@@ -16,6 +16,8 @@ alias la='lsd -alh --icon=never'
 
 alias grep='rg'
 
+alias reload='source ~/.config/zsh/.zshrc'
+
 #alias find='fd'
 
 
