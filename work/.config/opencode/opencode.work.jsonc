@@ -38,14 +38,6 @@
     "wandb-docs": {
       "type": "remote",
       "url": "{env:CW_WANDB_DOCS_URL}"
-    },
-    "github": {
-      "type": "remote",
-      "url": "{env:CW_GITHUB_MCP_URL}",
-      "oauth": false,
-      "headers": {
-        "Authorization": "Bearer {env:GITHUB_TOKEN}"
-      }
     }
   }
 }
