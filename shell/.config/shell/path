@@ -9,4 +9,11 @@ export PATH=$PATH:$HOME/go/bin
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
 
-export PATH=/home/ahmza/.opencode/bin:$PATH
+# opencode's official installer (used by `install`) drops its binary here. Guarded
+# because the directory is absent on hosts where opencode comes from a package
+# manager instead (nix on shadow, which serves it from /run/current-system/sw/bin).
+# An `if` rather than `[ ... ] && ...` so sourcing this file still exits 0 on the
+# hosts where the guard is false — it is the last statement in the file.
+if [ -d "$HOME/.opencode/bin" ]; then
+    export PATH="$HOME/.opencode/bin:$PATH"
+fi
