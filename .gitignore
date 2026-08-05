@@ -15,3 +15,7 @@ opencode/.config/opencode/bun.lockb
 
 # work package: real secrets/internal URLs (keep the .example template committed)
 work/.config/work/secrets
+
+# work package: agents referencing internal CoreWeave hosts, datasource UIDs and
+# asset identifiers. Kept out of git until redacted into a committable .example.
+work/.config/opencode/agents/node-triage.md
