@@ -144,9 +144,17 @@ servers referenced by `opencode.jsonc`:
 
 Selecting `opencode` in the installer installs opencode itself, then downloads
 the official prebuilt binaries for both MCP servers into `~/.local/bin`
-(falling back to `go install`), and runs `engram setup opencode` to wire up the
-engram plugin. Both servers are referenced by bare command name, so they resolve
-from `PATH` on any machine.
+(falling back to `go install`). Both servers are referenced by bare command name,
+so they resolve from `PATH` on any machine.
+
+After stowing, the installer runs `engram setup opencode`, which generates
+`plugins/engram.ts`. That file is **not tracked by this repo** — it is gitignored
+and regenerated per host, because engram bakes a host-specific binary path into it
+(a `/nix/store/...` path where engram comes from nix, `~/.local/bin` elsewhere).
+Stow folds `~/.config/opencode` into a symlink back into this repo, so the command
+writes through it; tracking the result meant a permanently dirty working tree that
+churned on every engram upgrade. On a fresh machine, run `engram setup opencode`
+(or the installer) to produce it.
 
 ## Docs
 
