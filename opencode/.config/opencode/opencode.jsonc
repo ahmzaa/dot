@@ -1,6 +1,42 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "lsp": true,
+  // Defaults to 1, which silently makes "delegate to `explore` via task"
+  // a no-op inside any subagent — node-triage hands 260KB AWX logs to
+  // explore, so it needs 2.
+  //
+  // SECURITY: raising this is only safe because every read-only subagent
+  // pins `permission.task`. Without that, a subagent with `edit: deny`
+  // could spawn the built-in `general` agent (full write) and edit through
+  // it. If you add a read-only subagent, give it a task deny/allowlist.
+  "subagent_depth": 2,
+  "model": "anthropic/claude-sonnet-5",
+  // Prompt-cache traffic dominates cost: measured over 56 sessions, cache
+  // writes were 58% of spend and cache reads 37%, vs 5.6% for output and
+  // ~0% for fresh input. So context size is the cost driver, not reasoning
+  // effort. prune drops stale tool outputs instead of carrying them for the
+  // life of the session and re-caching them on every cache expiry.
+  "compaction": {
+    "auto": true,
+    "prune": true,
+    "tail_turns": 2
+  },
+  "agent": {
+    // "high" not "xhigh" for latency, not cost — output is only ~5.6% of
+    // spend, so the reasoning knob is nearly cost-neutral. Cycle up with the
+    // variant_cycle keybind on turns that need it.
+    "build": {
+      "model": "anthropic/claude-opus-5",
+      "variant": "high"
+    },
+    // Low volume, high leverage — this is the place to spend reasoning.
+    // opus-5 not fable-5: fable is tuned for creative writing and costs 2x
+    // ($10/$50 vs $5/$25 per Mtok), opus-5 is the coding/agent model.
+    "plan": {
+      "model": "anthropic/claude-opus-5",
+      "variant": "xhigh"
+    }
+  },
   "mcp": {
     "engram": {
       "enabled": true,
