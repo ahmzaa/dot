@@ -13,6 +13,13 @@ opencode/.config/opencode/package-lock.json
 opencode/.config/opencode/bun.lock
 opencode/.config/opencode/bun.lockb
 
+# Generated per-host by `engram setup opencode` (run from `install`), not shipped
+# by this repo. Since stow folds ~/.config/opencode into a symlink pointing here,
+# that command writes straight into this working tree. Its ENGRAM_BIN fallback is
+# host-specific (a /nix/store/... path on shadow vs ~/.local/bin elsewhere), so
+# tracking it means a permanent dirty file that re-churns on every engram upgrade.
+opencode/.config/opencode/plugins/engram.ts
+
 # work package: real secrets/internal URLs (keep the .example template committed)
 work/.config/work/secrets
 
