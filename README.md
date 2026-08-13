@@ -26,6 +26,7 @@ Each top-level directory is a Stow package whose contents mirror `$HOME`.
 | `xdg-dirs` | XDG user directory config |
 | `MangoHud` | Gaming HUD (Linux) |
 | `work` | Work-laptop-only overrides (opt-in; gitignored secrets) — see [Host-specific config](#host-specific-config) |
+| `ca` | SSH CA host signing script (`sign-key`) — CA host only, opt-in; see [docs/ssh-cert-setup.md](docs/ssh-cert-setup.md) |
 
 ## Requirements
 

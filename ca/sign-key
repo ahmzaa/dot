@@ -1,0 +1,118 @@
+#!/usr/bin/env bash
+#####################################################################
+# sign-key — sign a user public key with the SSH CA key.
+#
+# Lives on the CA host only (stow package `ca`, or copy it by hand).
+#
+# Two modes:
+#
+#   1. Remote, used by the ssh-cert client:
+#        sign-key <principal> <base64-public-key>
+#      Decodes the key into a private temp dir, signs it, prints the
+#      certificate between BEGIN/END markers, and deletes the temp dir.
+#      It never leaves predictable files such as /tmp/id_ed25519.pub.
+#
+#   2. Manual, on the CA itself (e.g. minting the first cert for a new
+#      machine, before ssh-cert has anything to renew):
+#        sign-key -f /path/to/id_ed25519.pub <principal>
+#      Writes <name>-cert.pub next to the input key, as before.
+#
+# The CA key is passphrase-protected, so ssh-keygen prompts on the
+# terminal. The client runs `ssh -tt` to allocate a PTY so that works.
+# Because a PTY merges the remote stdout and stderr into a single
+# stream, the BEGIN/END markers are the only reliable way for the
+# client to pick the certificate out of the prompt and ssh-keygen's
+# progress messages.
+#
+# By default this CA only signs for the CA account's own username. If
+# ~/.ssh/sign-key-principals exists, it replaces that default with the
+# complete allowlist (one username per line).
+#####################################################################
+set -uo pipefail
+
+CA_KEY="${SSH_CA_KEY:-$HOME/.ssh/ca_user_key}"
+# Backdated one day to tolerate clock skew between clients and the CA.
+CERT_VALIDITY="${SSH_CERT_VALIDITY:--1d:+1w}"
+PRINCIPALS_FILE="${SSH_PRINCIPALS_FILE:-$HOME/.ssh/sign-key-principals}"
+MAX_KEY_B64=4096
+
+CERT_BEGIN='-----BEGIN SSH-CERT-----'
+CERT_END='-----END SSH-CERT-----'
+
+die() {
+    printf 'sign-key: %s\n' "$1" >&2
+    exit 1
+}
+
+usage() {
+    cat >&2 <<'EOF'
+usage: sign-key <principal> <base64-public-key>   # used by ssh-cert
+       sign-key -f <public-key-path> <principal>  # manual, on the CA
+EOF
+    exit 2
+}
+
+_check_principal() {
+    local principal=$1
+    [[ $principal =~ ^[a-z_][a-z0-9_-]*$ ]] || die "invalid principal"
+    if [ -f "$PRINCIPALS_FILE" ]; then
+        grep -Fxq "$principal" "$PRINCIPALS_FILE" && return 0
+    elif [ "$principal" = "$(id -un)" ]; then
+        return 0
+    fi
+    die "principal '$principal' is not permitted"
+}
+
+_sign() {
+    local cert_id
+    [ -f "$CA_KEY" ] || die "CA key not found: $CA_KEY"
+    cert_id="${SSH_CERT_ID:-$2-$(date -u +%Y%m%dT%H%M%SZ)}"
+    ssh-keygen -s "$CA_KEY" \
+               -I "$cert_id" \
+               -n "$2" \
+               -V "$CERT_VALIDITY" \
+               "$1"
+}
+
+case "${1:-}" in
+    -f)
+        [ "$#" -eq 3 ] || usage
+        pub=$2
+        principal=$3
+        [ -f "$pub" ] || die "no such public key: $pub"
+        _check_principal "$principal"
+        _sign "$pub" "$principal"
+        ;;
+    -h|--help|'')
+        usage
+        ;;
+    *)
+        [ "$#" -eq 2 ] || usage
+        principal=$1
+        key_b64=$2
+
+        _check_principal "$principal"
+        [ "${#key_b64}" -le "$MAX_KEY_B64" ] || die "public key is implausibly large"
+        [[ $key_b64 =~ ^[A-Za-z0-9+/=]+$ ]] || die "public key must be base64"
+
+        workdir=$(mktemp -d "${TMPDIR:-/tmp}/sign-key.XXXXXXXX") || die "could not create a temp dir"
+        trap 'rm -rf "$workdir"' EXIT HUP INT TERM
+        chmod 700 "$workdir"
+
+        umask 077
+        printf '%s' "$key_b64" | base64 -d > "$workdir/key.pub" 2>/dev/null \
+            || die "could not decode the public key"
+
+        # Make sure this is really a public key, not a private one.
+        ssh-keygen -l -f "$workdir/key.pub" >/dev/null 2>&1 \
+            || die "supplied data is not a valid public key"
+        grep -q -- '-----BEGIN' "$workdir/key.pub" && die "refusing a PEM-encoded blob"
+
+        _sign "$workdir/key.pub" "$principal" || die "signing failed"
+        [ -f "$workdir/key-cert.pub" ] || die "no certificate was produced"
+
+        printf '%s\n' "$CERT_BEGIN"
+        cat "$workdir/key-cert.pub"
+        printf '%s\n' "$CERT_END"
+        ;;
+esac

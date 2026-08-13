@@ -41,7 +41,10 @@ REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
 # `work` is a real stow package but is CoreWeave/work-laptop specific, so it is
 # excluded from auto-discovery (and therefore from `all`). It is offered
 # explicitly via the `work` group so only the work machine opts into it.
-NON_PACKAGES=(docs work)
+# `ca` holds the SSH CA host's signing script. It is a valid stow package
+# (`stow ca` puts sign-key in ~) but belongs only on the CA host, so it is
+# kept out of auto-discovery. See docs/ssh-cert-setup.md.
+NON_PACKAGES=(docs work ca)
 
 # Print the repo banner (ASCII art) if present.
 print_banner() {

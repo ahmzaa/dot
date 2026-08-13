@@ -6,22 +6,71 @@
 #   * Autodetects every ~/.ssh/*-cert.pub certificate.
 #   * Prints the remaining validity for each cert (always visible).
 #   * If a cert falls below the renewal threshold, renews it against
-#     the CA using key-based (non-interactive) auth.
-#   * Never blocks the shell: if the CA is unreachable it warns and
-#     skips.
+#     the CA.
+#   * Transport auth is key-based and non-interactive (BatchMode). The
+#     CA's *signing* key is passphrase-protected, so the signing step
+#     allocates a PTY and prompts. That prompt is the only thing that
+#     can block the shell, and it is guarded: no TTY, no agent key, or
+#     SSH_CERT_AUTORENEW=0 all skip renewal instead of hanging.
+#
+# Signing wire format (one connection, no scp or persistent staging):
+#   ssh -tt CA "./sign-key <principal> <base64 public key>"
+# The CA's sign-key signs in a private, automatically cleaned temp dir
+# and returns the certificate between BEGIN/END markers. A PTY merges
+# the remote stdout and stderr, so the markers are what separate the
+# certificate from the passphrase prompt and any diagnostics. The
+# public key travels as a base64 argument rather than via scp: modern
+# scp speaks SFTP, and predictable files such as /tmp/id_ed25519.pub
+# are no longer left behind.
 #
 # Configuration (set in the gitignored $XDG_CONFIG_HOME/shell/vars):
 #   SSH_CA_HOST              CA hostname/IP (e.g. 10.10.100.13)
 #   SSH_CA_USER              principal to sign for (e.g. ahmza)
 #   SSH_CERT_RENEW_THRESHOLD seconds; renew when less than this remains
 #                            (default 3600)
+#   SSH_CERT_AUTORENEW       set to 0 to never renew at startup
+#   SSH_CERT_RENEW_COOLDOWN  seconds before retrying a failed renewal
+#                            (default 300; --force bypasses it)
 #
-# Requires: a bootstrap key (e.g. ~/.ssh/id_ed25519) trusted by the CA
-# so scp/ssh work without a password. See docs/ssh-cert-setup.md.
+# Requires: a bootstrap key (e.g. ~/.ssh/id_ed25519) loaded in the
+# agent and trusted by the CA. See docs/ssh-cert-setup.md.
 #####################################################################
 
 SSH_DIR="$HOME/.ssh"
 SSH_CERT_RENEW_THRESHOLD="${SSH_CERT_RENEW_THRESHOLD:-3600}"
+SSH_CERT_AUTORENEW="${SSH_CERT_AUTORENEW:-1}"
+SSH_CERT_RENEW_COOLDOWN="${SSH_CERT_RENEW_COOLDOWN:-300}"
+SSH_CA_HOST="${SSH_CA_HOST:-}"
+SSH_CA_USER="${SSH_CA_USER:-}"
+
+CERT_BEGIN='-----BEGIN SSH-CERT-----'
+CERT_END='-----END SSH-CERT-----'
+LOCK_STALE_AFTER=3600
+
+case "${1:-}" in
+    --force)
+        SSH_CERT_RENEW_COOLDOWN=0
+        shift
+        ;;
+    -h|--help)
+        echo "usage: ssh-cert [--force]"
+        exit 0
+        ;;
+    '') ;;
+    *)
+        echo "ssh-cert: unknown option: $1" >&2
+        exit 2
+        ;;
+esac
+[ "$#" -eq 0 ] || {
+    echo "ssh-cert: unexpected arguments" >&2
+    exit 2
+}
+if ! [[ $SSH_CERT_RENEW_THRESHOLD =~ ^[0-9]+$ ]] \
+    || ! [[ $SSH_CERT_RENEW_COOLDOWN =~ ^[0-9]+$ ]]; then
+    echo "ssh-cert: renewal threshold and cooldown must be non-negative integers" >&2
+    exit 2
+fi
 
 # Nothing to do if there are no certs on this machine.
 certs=("$SSH_DIR"/*-cert.pub)
@@ -51,15 +100,33 @@ _cert_expiry_ts() {
         || date -d "$expiry_str" "+%s" 2>/dev/null
 }
 
-# Preflight: is the CA reachable without prompting for a password?
+# base64 with no line wrapping, portable across GNU and BSD/macOS.
+_b64() {
+    base64 < "$1" | tr -d '\n'
+}
+
+_file_mtime() {
+    stat -c '%Y' "$1" 2>/dev/null || stat -f '%m' "$1" 2>/dev/null
+}
+
+# Is the bootstrap key usable right now? BatchMode auth cannot prompt
+# for a key passphrase, so a cold agent means we must skip.
+_agent_has_keys() {
+    ssh-add -l >/dev/null 2>&1
+}
+
+# Preflight: can we authenticate to the CA with no prompting at all?
 _ca_reachable() {
     [ -n "$SSH_CA_HOST" ] || return 1
     ssh -o BatchMode=yes -o ConnectTimeout=5 "$SSH_CA_HOST" true >/dev/null 2>&1
 }
 
-_renew_cert() {
+_renew_cert() (
     local cert="$1"
-    local base pub name
+    local base pub name b64 raw new_cert tmp ssh_rc
+    local lock_dir lock_mtime lock_age lock_pid
+    local attempt_file last_attempt now_attempt tty_state
+
     name=$(basename "$cert")            # id_ed25519_sk-cert.pub
     base="${name%-cert.pub}"            # id_ed25519_sk
     pub="$SSH_DIR/${base}.pub"
@@ -72,35 +139,193 @@ _renew_cert() {
         echo "ssh-cert: SSH_CA_HOST / SSH_CA_USER not set, cannot renew $name" >&2
         return 1
     fi
-    if ! _ca_reachable; then
-        echo "ssh-cert: CA $SSH_CA_HOST unreachable, skipping renewal of $name" >&2
+    if ! [[ $SSH_CA_USER =~ ^[a-z_][a-z0-9_-]*$ ]]; then
+        echo "ssh-cert: SSH_CA_USER is not a valid principal" >&2
         return 1
     fi
 
-    echo "ssh-cert: renewing $name ..."
-    scp -o BatchMode=yes -o ConnectTimeout=5 "$pub" "$SSH_CA_HOST:/tmp/" \
-        && ssh -T -o BatchMode=yes -o ConnectTimeout=5 "$SSH_CA_HOST" \
-               "./sign-key /tmp/${base}.pub $SSH_CA_USER" < /dev/null \
-        && scp -o BatchMode=yes -o ConnectTimeout=5 \
-               "$SSH_CA_HOST:/tmp/${base}-cert.pub" "$SSH_DIR/" \
-        && echo "ssh-cert: $name renewed" \
-        || echo "ssh-cert: renewal of $name failed" >&2
-}
+    attempt_file="$SSH_DIR/.${name}.last-attempt"
+    if [ "$SSH_CERT_RENEW_COOLDOWN" -gt 0 ] && [ -f "$attempt_file" ]; then
+        last_attempt=$(_file_mtime "$attempt_file" || echo 0)
+        now_attempt=$(date +%s)
+        if [ $(( now_attempt - last_attempt )) -lt "$SSH_CERT_RENEW_COOLDOWN" ]; then
+            echo "ssh-cert: renewal was attempted recently; use 'ssh-cert --force' to retry now" >&2
+            return 0
+        fi
+    fi
 
+    lock_dir="$SSH_DIR/.${name}.renew.lock"
+    if ! mkdir "$lock_dir" 2>/dev/null; then
+        if [ ! -d "$lock_dir" ]; then
+            echo "ssh-cert: could not create renewal lock $lock_dir" >&2
+            return 1
+        fi
+        lock_mtime=$(_file_mtime "$lock_dir" || echo 0)
+        lock_age=$(( $(date +%s) - lock_mtime ))
+        lock_pid=$(cat "$lock_dir/pid" 2>/dev/null || true)
+        if ! [[ $lock_pid =~ ^[0-9]+$ ]] \
+            || ! kill -0 "$lock_pid" 2>/dev/null \
+            || [ "$lock_age" -gt "$LOCK_STALE_AFTER" ]; then
+            rm -rf "$lock_dir"
+            mkdir "$lock_dir" 2>/dev/null || {
+                echo "ssh-cert: could not replace stale renewal lock $lock_dir" >&2
+                return 1
+            }
+        else
+            echo "ssh-cert: renewal of $name is already in progress (lock: $lock_dir)" >&2
+            return 0
+        fi
+    fi
+    printf '%s\n' "$$" > "$lock_dir/pid"
+
+    tmp=""
+    new_cert=""
+    tty_state=""
+    _cleanup() {
+        [ -z "$tty_state" ] || stty "$tty_state" < /dev/tty > /dev/tty 2>/dev/null || true
+        [ -z "$tmp" ] || rm -f "$tmp" "$tmp.rc"
+        [ -z "$new_cert" ] || rm -f "$new_cert"
+        rm -rf "$lock_dir"
+    }
+    trap _cleanup EXIT
+    trap 'exit 130' HUP INT TERM
+    touch "$attempt_file"
+
+    if ! _ca_reachable; then
+        if ! _agent_has_keys; then
+            echo "ssh-cert: no usable key in ssh-agent — run 'ssh-add' then 'ssh-cert' to renew $name" >&2
+        else
+            echo "ssh-cert: cannot reach or authenticate to CA $SSH_CA_HOST in BatchMode, skipping $name" >&2
+        fi
+        return 1
+    fi
+
+    b64=$(_b64 "$pub") || {
+        echo "ssh-cert: could not encode $pub" >&2
+        return 1
+    }
+
+    tmp=$(mktemp "${TMPDIR:-/tmp}/ssh-cert.XXXXXXXX") || {
+        echo "ssh-cert: could not create a temp file" >&2
+        return 1
+    }
+    tty_state=$(stty -g < /dev/tty 2>/dev/null || true)
+
+    echo "ssh-cert: renewing $name — enter the CA signing key passphrase (Ctrl-C to skip)"
+
+    # -tt forces a remote PTY so ssh-keygen can prompt; ssh -t alone
+    # declines when local stdin is not a terminal. BatchMode still
+    # applies to *authentication*, keeping the transport non-interactive.
+    # tee passes the prompt through to the terminal unbuffered (a plain
+    # command substitution would swallow it and leave the user blind).
+    # ssh's exit status is stashed in a file rather than read from
+    # PIPESTATUS, which does not exist in zsh (it spells it pipestatus).
+    { ssh -tt -o BatchMode=yes -o ConnectTimeout=5 "$SSH_CA_HOST" \
+          "./sign-key $SSH_CA_USER $b64" 2>&1; echo "$?" > "$tmp.rc"; } \
+        | tee "$tmp" > /dev/tty
+    ssh_rc=$(cat "$tmp.rc" 2>/dev/null || true)
+    if [ "${ssh_rc:-1}" -ne 0 ]; then
+        echo "ssh-cert: signing failed on $SSH_CA_HOST" >&2
+        return 1
+    fi
+
+    # The PTY turns every LF into CRLF; strip the CRs before parsing.
+    raw=$(tr -d '\r' < "$tmp" | awk -v begin="$CERT_BEGIN" -v end="$CERT_END" '
+        $0 == begin { capture=1; next }
+        capture && $0 == end { exit }
+        capture { print }
+    ')
+    if [ -z "$raw" ]; then
+        echo "ssh-cert: no certificate returned by $SSH_CA_HOST" >&2
+        return 1
+    fi
+
+    # Validate before overwriting a working certificate.
+    new_cert=$(mktemp "$SSH_DIR/.${name}.XXXXXXXX") || {
+        echo "ssh-cert: could not create a temporary certificate in $SSH_DIR" >&2
+        return 1
+    }
+    printf '%s\n' "$raw" > "$new_cert"
+    if ! ssh-keygen -Lf "$new_cert" >/dev/null 2>&1; then
+        echo "ssh-cert: $SSH_CA_HOST returned something that is not a certificate" >&2
+        return 1
+    fi
+
+    local pub_fp cert_fp cert_expiry
+    pub_fp=$(ssh-keygen -lf "$pub" 2>/dev/null | awk '{print $2}')
+    cert_fp=$(ssh-keygen -Lf "$new_cert" 2>/dev/null | awk '/Public key:/ {print $NF; exit}')
+    if [ -z "$pub_fp" ] || [ "$pub_fp" != "$cert_fp" ]; then
+        echo "ssh-cert: returned certificate does not match $pub" >&2
+        return 1
+    fi
+    if ! ssh-keygen -Lf "$new_cert" 2>/dev/null | awk -v principal="$SSH_CA_USER" '
+        /^[[:space:]]*Principals:/ { in_principals=1; next }
+        /^[[:space:]]*(Critical Options|Extensions):/ { in_principals=0 }
+        in_principals && $1 == principal { found=1 }
+        END { exit !found }
+    '; then
+        echo "ssh-cert: returned certificate does not include principal $SSH_CA_USER" >&2
+        return 1
+    fi
+    cert_expiry=$(_cert_expiry_ts "$new_cert") || {
+        echo "ssh-cert: returned certificate has no readable expiry" >&2
+        return 1
+    }
+    if [ "$cert_expiry" -le "$(date +%s)" ]; then
+        echo "ssh-cert: returned certificate is already expired" >&2
+        return 1
+    fi
+
+    chmod 644 "$new_cert"
+    if ! mv "$new_cert" "$cert"; then
+        echo "ssh-cert: could not install the new certificate at $cert" >&2
+        return 1
+    fi
+    new_cert=""
+
+    local expiry
+    if expiry=$(_cert_expiry_ts "$cert") && [ -n "$expiry" ]; then
+        echo "ssh-cert: $name renewed, valid for $(_fmt_duration "$(( expiry - $(date +%s) ))")"
+    else
+        echo "ssh-cert: $name renewed"
+    fi
+    return 0
+)
+
+rc=0
 now=$(date +%s)
 for cert in "${certs[@]}"; do
     [ -f "$cert" ] || continue
     name=$(basename "$cert")
     expiry=$(_cert_expiry_ts "$cert") || {
         echo "ssh-cert: could not read expiry for $name" >&2
+        rc=1
         continue
     }
     remaining=$(( expiry - now ))
 
-    if [ "$remaining" -lt "$SSH_CERT_RENEW_THRESHOLD" ]; then
-        echo "ssh-cert: $name expires in $(_fmt_duration "$remaining") — renewing"
-        _renew_cert "$cert"
-    else
+    if [ "$remaining" -ge "$SSH_CERT_RENEW_THRESHOLD" ]; then
         echo "ssh-cert: $name valid for $(_fmt_duration "$remaining")"
+        continue
     fi
+
+    if [ "$remaining" -lt 0 ]; then
+        echo "ssh-cert: $name has expired"
+    else
+        echo "ssh-cert: $name expires in $(_fmt_duration "$remaining")"
+    fi
+
+    # The signing step prompts, so refuse to run anywhere it could hang.
+    if [ "$SSH_CERT_AUTORENEW" = "0" ]; then
+        echo "ssh-cert: autorenew disabled; run 'SSH_CERT_AUTORENEW=1 ssh-cert' to renew" >&2
+        continue
+    fi
+    if [ ! -t 0 ] || [ ! -r /dev/tty ] || [ ! -w /dev/tty ]; then
+        echo "ssh-cert: no TTY to prompt for the CA passphrase, run 'ssh-cert' interactively" >&2
+        continue
+    fi
+
+    _renew_cert "$cert" || rc=1
 done
+
+exit "$rc"
