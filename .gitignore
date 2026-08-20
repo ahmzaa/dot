@@ -19,3 +19,10 @@ work/.config/work/secrets
 # work package: agents referencing internal CoreWeave hosts, datasource UIDs and
 # asset identifiers. Kept out of git until redacted into a committable .example.
 work/.config/opencode/agents/node-triage.md
+
+# herdr package: runtime state written into the stow dir by the running server
+# (logs, sockets, session layout). Only config.toml is meant to be versioned.
+herdr/.config/herdr/*.log
+herdr/.config/herdr/*.sock
+herdr/.config/herdr/session.json
+herdr/.config/herdr/.plugins.lock
