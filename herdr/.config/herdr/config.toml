@@ -4,6 +4,14 @@ delivery = "terminal"
 [ui]
 agent_panel_sort = "spaces"
 
+# Apply the workspace presets in presets.toml on demand. They are also applied
+# automatically at server start by the `local.presets` plugin's startup hook.
+[[keys.command]]
+key = "prefix+a"
+type = "plugin_action"
+command = "local.presets.apply"
+description = "apply workspace presets"
+
 [keys]
 focus_pane_left = ["prefix+h", "ctrl+alt+h"]
 focus_pane_down = ["prefix+j", "ctrl+alt+j"]

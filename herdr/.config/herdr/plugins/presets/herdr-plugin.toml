@@ -1,0 +1,19 @@
+id = "local.presets"
+name = "Workspace Presets"
+version = "0.1.0"
+min_herdr_version = "0.8.2"
+description = "Materialise declarative workspace presets from presets.toml"
+platforms = ["macos", "linux"]
+
+# Runs once after the session is restored and the API socket is ready. Also
+# runs when a new server takes over during `herdr update` handoff, so apply.sh
+# must be idempotent.
+[[startup]]
+command = ["bash", "apply.sh"]
+
+# On-demand re-apply. Also reachable from a keybinding in config.toml.
+[[actions]]
+id = "apply"
+title = "Apply workspace presets"
+contexts = ["global"]
+command = ["bash", "apply.sh"]

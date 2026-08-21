@@ -21,8 +21,10 @@ work/.config/work/secrets
 work/.config/opencode/agents/node-triage.md
 
 # herdr package: runtime state written into the stow dir by the running server
-# (logs, sockets, session layout). Only config.toml is meant to be versioned.
+# (logs, sockets, session layout). config.toml, presets.toml, and plugins/ are
+# versioned; plugins.json is a generated registry holding absolute paths.
 herdr/.config/herdr/*.log
 herdr/.config/herdr/*.sock
 herdr/.config/herdr/session.json
 herdr/.config/herdr/.plugins.lock
+herdr/.config/herdr/plugins.json

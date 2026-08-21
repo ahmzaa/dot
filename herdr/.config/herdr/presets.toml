@@ -1,0 +1,53 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# herdr workspace presets — consumed by the `local.presets` plugin.
+#
+# Mirrors the session/window model from ~/.config/sesh/sesh.toml, but in herdr
+# terms:
+#
+#   sesh session         -> herdr workspace   (name = label, path = cwd)
+#   sesh window          -> herdr tab         (name = label, startup_script)
+#   sesh startup_command -> command run in the workspace's first tab
+#
+# Per workspace:
+#   name    workspace label, and the idempotency key
+#   cwd     workspace directory ('~' is expanded)
+#   command run in the first tab
+#   tab     label for the first tab; defaults to `name` if omitted, since
+#           herdr would otherwise leave it as "1"
+#   tabs    additional tabs, each { name, command, cwd? } — cwd defaults to
+#           the workspace cwd
+#
+# Applied automatically on server start (idempotent: a workspace whose label
+# already exists is skipped), and on demand via `prefix+w` or:
+#
+#   herdr plugin action invoke local.presets.apply
+#
+# sesh-only keys (preview_command, wildcard, blacklist, dir_length) have no
+# herdr equivalent and are intentionally absent.
+# ─────────────────────────────────────────────────────────────────────────────
+
+[[workspace]]
+name = "dotfiles"
+cwd = "~/dot"
+command = "nvim -c ':Telescope find_files'"
+tab = "edit"
+
+[[workspace]]
+name = "nodes"
+cwd = "~/nodes"
+command = "ls"
+tabs = [
+  { name = "eu-north-02-mgmt", command = "tls eu-north-02a mgmt" },
+  { name = "eu-north-02-fleet", command = "tls eu-north-02a fleet" },
+  { name = "us-east-01a-mgmt", command = "tl us-east-01a mgmt" },
+  { name = "bmaas", command = "hocheck -m -r eu-north-02" },
+  { name = "opencode", command = "opencode" },
+]
+
+[[workspace]]
+name = "projects"
+cwd = "~/prj"
+command = "ls"
+tabs = [
+  { name = "opencode", command = "opencode" },
+]
