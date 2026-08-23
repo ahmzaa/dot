@@ -57,5 +57,8 @@
         "-T", "{env:GITEA_TOKEN}"
       ]
     }
-  }
+  },
+  "plugin": [
+    "@honcho-ai/opencode-honcho"
+  ]
 }

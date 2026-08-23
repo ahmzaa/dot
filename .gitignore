@@ -20,6 +20,16 @@ opencode/.config/opencode/bun.lockb
 # tracking it means a permanent dirty file that re-churns on every engram upgrade.
 opencode/.config/opencode/plugins/engram.ts
 
+# Installed and version-stamped by herdr (HERDR_INTEGRATION_VERSION header), which
+# overwrites them whenever the integration is reinstalled or upgraded. Same reasoning
+# as engram.ts above: stow folds ~/.config/opencode into a symlink pointing here, so
+# herdr writes straight into this working tree and tracking them means a file that
+# re-churns on every herdr bump. They regenerate on any host that has herdr, and the
+# agent-state plugin no-ops when HERDR_ENV != 1, so nothing breaks without them.
+opencode/.config/opencode/plugins/herdr-agent-state.js
+opencode/.config/opencode/herdr-tui-session.js
+opencode/.config/opencode/tui.jsonc
+
 # work package: real secrets/internal URLs (keep the .example template committed)
 work/.config/work/secrets
 
