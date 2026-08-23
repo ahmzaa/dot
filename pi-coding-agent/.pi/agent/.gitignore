@@ -1,6 +1,14 @@
-auth.json
-mcp-cache.json
-mcp.json
-models-store.json
-npm
-sessions
+# Credentials: recreate with /login on each machine.
+/auth.json
+
+# Generated caches and per-machine runtime state.
+/mcp-cache.json
+/models-store.json
+/run-history.jsonl
+/sessions/
+/missions/
+/trust.json
+
+# Package checkouts are reconstructed from settings.json on startup.
+/npm/
+/git/
