@@ -18,7 +18,9 @@
 # The CA's sign-key signs in a private, automatically cleaned temp dir
 # and returns the certificate between BEGIN/END markers. A PTY merges
 # the remote stdout and stderr, so the markers are what separate the
-# certificate from the passphrase prompt and any diagnostics. The
+# certificate from the passphrase prompt and any diagnostics; the
+# certificate itself is captured for parsing and kept off the terminal,
+# so only the prompt and diagnostics are shown. The
 # public key travels as a base64 argument rather than via scp: modern
 # scp speaks SFTP, and predictable files such as /tmp/id_ed25519.pub
 # are no longer left behind.
@@ -216,13 +218,24 @@ _renew_cert() (
     # -tt forces a remote PTY so ssh-keygen can prompt; ssh -t alone
     # declines when local stdin is not a terminal. BatchMode still
     # applies to *authentication*, keeping the transport non-interactive.
-    # tee passes the prompt through to the terminal unbuffered (a plain
-    # command substitution would swallow it and leave the user blind).
+    # The PTY merges the prompt, the diagnostics and the certificate into
+    # one stream. awk splits it: everything is captured to $tmp for
+    # parsing below, but the certificate body is withheld from the
+    # terminal so it is not dumped into the shell on every renewal. The
+    # rest passes through unbuffered (a plain command substitution would
+    # swallow the prompt and leave the user blind).
     # ssh's exit status is stashed in a file rather than read from
     # PIPESTATUS, which does not exist in zsh (it spells it pipestatus).
     { ssh -tt -o BatchMode=yes -o ConnectTimeout=5 "$SSH_CA_HOST" \
           "./sign-key $SSH_CA_USER $b64" 2>&1; echo "$?" > "$tmp.rc"; } \
-        | tee "$tmp" > /dev/tty
+        | awk -v out="$tmp" -v begin="$CERT_BEGIN" -v end="$CERT_END" '
+            { print > out }
+            { line = $0; sub(/\r$/, "", line) }
+            line == begin { in_cert = 1; next }
+            line == end   { in_cert = 0; next }
+            in_cert       { next }
+                          { print line; fflush() }
+          ' > /dev/tty
     ssh_rc=$(cat "$tmp.rc" 2>/dev/null || true)
     if [ "${ssh_rc:-1}" -ne 0 ]; then
         echo "ssh-cert: signing failed on $SSH_CA_HOST" >&2
