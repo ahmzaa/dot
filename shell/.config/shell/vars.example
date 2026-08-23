@@ -28,6 +28,6 @@ export ATLASSIAN_API_TOKEN="<atlassian-api-token>"
 # Both must be set or renewal is skipped with a warning.
 export SSH_CA_HOST="<ca-host-or-ip>"   # CA hostname / IP
 export SSH_CA_USER="<your-login>"      # principal to sign for
-# export SSH_CERT_RENEW_THRESHOLD=3600  # renew below this many seconds
+# export SSH_CERT_RENEW_THRESHOLD=86400 # renew below this many seconds (1 day)
 # export SSH_CERT_RENEW_COOLDOWN=300    # wait this long after a failed attempt
 # export SSH_CERT_AUTORENEW=0           # only check expiry at shell startup

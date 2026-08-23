@@ -49,7 +49,9 @@ files.
 
 The CA currently issues certificates with `-V -1d:+1w`: they are backdated one
 day for clock-skew tolerance and expire one week after signing. Renewal starts
-when less than `SSH_CERT_RENEW_THRESHOLD` remains (one hour by default).
+when less than `SSH_CERT_RENEW_THRESHOLD` remains (one day by default, so
+renewal is attempted throughout the final day of the window rather than in the
+last hour before expiry).
 
 ## Client setup
 
@@ -79,7 +81,7 @@ when less than `SSH_CERT_RENEW_THRESHOLD` remains (one hour by default).
    ```sh
    export SSH_CA_HOST="<ca-host-or-ip>"
    export SSH_CA_USER="<certificate-principal>"
-   # export SSH_CERT_RENEW_THRESHOLD=3600
+   # export SSH_CERT_RENEW_THRESHOLD=86400
    # export SSH_CERT_RENEW_COOLDOWN=300
    # export SSH_CERT_AUTORENEW=0
    ```

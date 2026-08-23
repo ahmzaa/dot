@@ -29,7 +29,8 @@
 #   SSH_CA_HOST              CA hostname/IP (e.g. 10.10.100.13)
 #   SSH_CA_USER              principal to sign for (e.g. ahmza)
 #   SSH_CERT_RENEW_THRESHOLD seconds; renew when less than this remains
-#                            (default 3600)
+#                            (default 86400, i.e. the last day of the
+#                            CA's one-week validity window)
 #   SSH_CERT_AUTORENEW       set to 0 to never renew at startup
 #   SSH_CERT_RENEW_COOLDOWN  seconds before retrying a failed renewal
 #                            (default 300; --force bypasses it)
@@ -39,7 +40,7 @@
 #####################################################################
 
 SSH_DIR="$HOME/.ssh"
-SSH_CERT_RENEW_THRESHOLD="${SSH_CERT_RENEW_THRESHOLD:-3600}"
+SSH_CERT_RENEW_THRESHOLD="${SSH_CERT_RENEW_THRESHOLD:-86400}"
 SSH_CERT_AUTORENEW="${SSH_CERT_AUTORENEW:-1}"
 SSH_CERT_RENEW_COOLDOWN="${SSH_CERT_RENEW_COOLDOWN:-300}"
 SSH_CA_HOST="${SSH_CA_HOST:-}"
@@ -80,16 +81,22 @@ if [ ! -e "${certs[0]}" ]; then
     exit 0
 fi
 
-# Human-readable duration from a number of seconds.
+# Human-readable duration from a number of seconds. Certificates are
+# valid for a week, so hours alone would read as an unhelpful "163h".
 _fmt_duration() {
-    local total="$1" h m
+    local total="$1" d h m
     if [ "$total" -lt 0 ]; then
         echo "expired"
         return
     fi
-    h=$(( total / 3600 ))
+    d=$(( total / 86400 ))
+    h=$(( (total % 86400) / 3600 ))
     m=$(( (total % 3600) / 60 ))
-    echo "${h}h${m}m"
+    if [ "$d" -gt 0 ]; then
+        echo "${d}d${h}h${m}m"
+    else
+        echo "${h}h${m}m"
+    fi
 }
 
 # Parse the "Valid: ... to <ISO>" expiry from a cert into a unix ts.
