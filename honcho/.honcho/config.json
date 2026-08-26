@@ -1,0 +1,14 @@
+{
+  "peerName": "ahmza",
+  "baseUrl": "http://100.71.142.223:8000",
+  "hosts": {
+    "opencode": {
+      "workspace": "hermes",
+      "aiPeer": "opencode",
+      "recallMode": "hybrid",
+      "sessionStrategy": "per-directory",
+      "removeUserPrefix": true
+    }
+  },
+  "apiKey": ""
+}

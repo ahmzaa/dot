@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "engram": {
+      "args": [
+        "mcp",
+        "--tools=agent"
+      ],
+      "command": "engram",
+      "directTools": false,
+      "lifecycle": "lazy"
+    },
+    "gitea": {
+      "command": "gitea-mcp",
+      "args": ["-t", "stdio", "--host", "https://tea.ahmza.com"]
+    }
+  }
+}
