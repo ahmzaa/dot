@@ -10,3 +10,5 @@ export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
 
 export PATH=/home/ahmza/.opencode/bin:$PATH
+
+export PATH=/Users/hahmed/coreweave/fleet-ops-sandbox/team/acannizzaro/scripts/L11-RMA-ify/:$PATH
