@@ -135,6 +135,36 @@ It provides:
 - `work/.config/work/secrets` — **gitignored**; holds internal URLs/tokens. Copy
   `secrets.example` to `secrets` and fill it in on the work machine.
 
+#### Running the CoreWeave installer
+
+`cw-fleet-tools` assumes an oh-my-zsh shell rooted at `~/.zshrc`. This repo uses
+neither: plugins come from `~/.zsh/plugins`, and `.zshenv` points `ZDOTDIR` at
+`~/.config/zsh`. Always run the work installer with **both** opt-outs:
+
+```sh
+CW_FT_SKIP_SHELL_SETUP=1 CW_FT_SKIP_ZSHRC=1 \
+  ~/coreweave/cw-fleet-tools/scripts/setup/first-time-install_v2.sh
+```
+
+Running it bare does two damaging things:
+
+- **Deletes `~/.cw-fleet-tools/.skip_shell`.** `recordSkipShell` rewrites that
+  flag every run and removes it unless `--skip-shell` is passed. Without it,
+  `setup/source` sources `setup/shell/source`, which forces
+  `ZSH=$HOME/.oh-my-zsh`, overrides `plugins=(...)`, and re-runs `starship init`
+  — double-wrapped ZLE widgets and `FUNCNEST` errors. Re-create it with:
+  `mkdir -p ~/.cw-fleet-tools && touch ~/.cw-fleet-tools/.skip_shell`
+- **Rewrites `~/.zshrc`.** `migrateZshrc` hardcodes `$HOME/.zshrc` and is
+  unaware of `ZDOTDIR`, so it writes a file zsh never reads and backs the old
+  one up to `~/.zshrc.bak.<epoch>`. Harmless but confusing — the real file is
+  `~/.config/zsh/.zshrc`.
+
+Separately, **never let the oh-my-zsh installer run with `ZDOTDIR` set**. It
+renames `$ZDOTDIR/.zshrc` to `.zshrc.pre-oh-my-zsh` — which silently turns the
+stow symlink into a dangling leftover — and drops its own template in place. To
+recover: `rm ~/.config/zsh/.zshrc && mv ~/.config/zsh/.zshrc.pre-oh-my-zsh
+~/.config/zsh/.zshrc`.
+
 ### opencode & MCP servers
 
 The `opencode` package ships the config, agents, plugins, and two local MCP
