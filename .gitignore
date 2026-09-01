@@ -1,5 +1,10 @@
 nvim/.config/nvim/lazy-lock.json
-zsh/.config/zsh/.zcompdump
+
+# zsh runtime state. Normally written to $ZDOTDIR (~/.config/zsh), which is an
+# unfolded real directory, so it never lands here. Kept as a guard for the case
+# where stow re-folds ~/.config/zsh into a symlink to this package — zsh would
+# then write straight into the working tree, and .zsh_history routinely carries
+# tokens. Do not remove just because the tree is currently clean.
 zsh/.config/zsh/.zcompdump*
 zsh/.config/zsh/.zsh_history
 zsh/.config/zsh/.zsh_sessions
