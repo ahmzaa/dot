@@ -1,0 +1,14 @@
+[Unit]
+Description=awww wallpaper daemon
+Documentation=https://codeberg.org/LGFae/awww
+PartOf=graphical-session.target
+After=graphical-session.target
+ConditionEnvironment=WAYLAND_DISPLAY
+
+[Service]
+Type=simple
+ExecStart=/usr/sbin/awww-daemon
+Restart=on-failure
+
+[Install]
+WantedBy=graphical-session.target
