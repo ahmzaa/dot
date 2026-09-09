@@ -3,6 +3,8 @@
 # ssh-cert — check & renew SSH user certificates at shell startup.
 #
 # Behaviour:
+#   * `ssh-cert --create [public-key]` issues the first certificate for a
+#     new device (defaults to ~/.ssh/id_ed25519.pub).
 #   * Autodetects every ~/.ssh/*-cert.pub certificate.
 #   * Prints the remaining validity for each cert (always visible).
 #   * If a cert falls below the renewal threshold, renews it against
@@ -50,35 +52,41 @@ CERT_BEGIN='-----BEGIN SSH-CERT-----'
 CERT_END='-----END SSH-CERT-----'
 LOCK_STALE_AFTER=3600
 
-case "${1:-}" in
-    --force)
-        SSH_CERT_RENEW_COOLDOWN=0
-        shift
-        ;;
-    -h|--help)
-        echo "usage: ssh-cert [--force]"
-        exit 0
-        ;;
-    '') ;;
-    *)
-        echo "ssh-cert: unknown option: $1" >&2
-        exit 2
-        ;;
-esac
-[ "$#" -eq 0 ] || {
-    echo "ssh-cert: unexpected arguments" >&2
-    exit 2
-}
+CREATE_CERT=0
+CREATE_PUB=""
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        --force)
+            SSH_CERT_RENEW_COOLDOWN=0
+            ;;
+        --create)
+            CREATE_CERT=1
+            if [ "$#" -gt 1 ] && [[ $2 != -* ]]; then
+                CREATE_PUB=$2
+                shift
+            fi
+            ;;
+        -h|--help)
+            cat <<'EOF'
+usage: ssh-cert [--force]
+       ssh-cert --create [public-key] [--force]
+
+--create issues the first certificate for a new device. The public key must
+be in ~/.ssh and defaults to ~/.ssh/id_ed25519.pub.
+EOF
+            exit 0
+            ;;
+        *)
+            echo "ssh-cert: unknown option: $1" >&2
+            exit 2
+            ;;
+    esac
+    shift
+done
 if ! [[ $SSH_CERT_RENEW_THRESHOLD =~ ^[0-9]+$ ]] \
     || ! [[ $SSH_CERT_RENEW_COOLDOWN =~ ^[0-9]+$ ]]; then
     echo "ssh-cert: renewal threshold and cooldown must be non-negative integers" >&2
     exit 2
-fi
-
-# Nothing to do if there are no certs on this machine.
-certs=("$SSH_DIR"/*-cert.pub)
-if [ ! -e "${certs[0]}" ]; then
-    exit 0
 fi
 
 # Human-readable duration from a number of seconds. Certificates are
@@ -132,6 +140,7 @@ _ca_reachable() {
 
 _renew_cert() (
     local cert="$1"
+    local action="${2:-renew}"
     local base pub name b64 raw new_cert tmp ssh_rc
     local lock_dir lock_mtime lock_age lock_pid
     local attempt_file last_attempt now_attempt tty_state
@@ -220,7 +229,11 @@ _renew_cert() (
     }
     tty_state=$(stty -g < /dev/tty 2>/dev/null || true)
 
-    echo "ssh-cert: renewing $name — enter the CA signing key passphrase (Ctrl-C to skip)"
+    if [ "$action" = "create" ]; then
+        echo "ssh-cert: creating $name — enter the CA signing key passphrase (Ctrl-C to skip)"
+    else
+        echo "ssh-cert: renewing $name — enter the CA signing key passphrase (Ctrl-C to skip)"
+    fi
 
     # -tt forces a remote PTY so ssh-keygen can prompt; ssh -t alone
     # declines when local stdin is not a terminal. BatchMode still
@@ -303,14 +316,61 @@ _renew_cert() (
     fi
     new_cert=""
 
-    local expiry
-    if expiry=$(_cert_expiry_ts "$cert") && [ -n "$expiry" ]; then
-        echo "ssh-cert: $name renewed, valid for $(_fmt_duration "$(( expiry - $(date +%s) ))")"
+    local expiry result
+    if [ "$action" = "create" ]; then
+        result="created"
     else
-        echo "ssh-cert: $name renewed"
+        result="renewed"
+    fi
+    if expiry=$(_cert_expiry_ts "$cert") && [ -n "$expiry" ]; then
+        echo "ssh-cert: $name $result, valid for $(_fmt_duration "$(( expiry - $(date +%s) ))")"
+    else
+        echo "ssh-cert: $name $result"
     fi
     return 0
 )
+
+if [ "$CREATE_CERT" = "1" ]; then
+    pub="${CREATE_PUB:-$SSH_DIR/id_ed25519.pub}"
+    case "$pub" in
+        */*) ;;
+        *) pub="$SSH_DIR/$pub" ;;
+    esac
+
+    if [ ! -f "$pub" ]; then
+        echo "ssh-cert: public key not found: $pub" >&2
+        exit 1
+    fi
+    if [ "$(dirname "$pub")" != "$SSH_DIR" ] || [[ $pub != *.pub ]]; then
+        echo "ssh-cert: public key must be a .pub file directly in $SSH_DIR" >&2
+        exit 2
+    fi
+    case "$pub" in
+        *-cert.pub)
+            echo "ssh-cert: expected a public key, not a certificate: $pub" >&2
+            exit 2
+            ;;
+    esac
+
+    cert="${pub%.pub}-cert.pub"
+    if [ -e "$cert" ]; then
+        echo "ssh-cert: certificate already exists: $cert (use 'ssh-cert --force' to renew it)" >&2
+        exit 1
+    fi
+    if [ ! -t 0 ] || [ ! -r /dev/tty ] || [ ! -w /dev/tty ]; then
+        echo "ssh-cert: no TTY to prompt for the CA passphrase; run --create interactively" >&2
+        exit 1
+    fi
+
+    _renew_cert "$cert" create
+    exit $?
+fi
+
+# Nothing to do during the startup check if this machine has no certificates.
+certs=("$SSH_DIR"/*-cert.pub)
+if [ ! -e "${certs[0]}" ]; then
+    exit 0
+fi
 
 rc=0
 now=$(date +%s)
