@@ -37,10 +37,28 @@ name = "nodes"
 cwd = "~/nodes"
 command = "ls"
 tabs = [
+  { name = "us-east-01a-mgmt", command = "tl us-east-01a mgmt" },
+]
+
+[[workspace]]
+name = "EU-NORTH-02A"
+cwd = "~/nodes"
+command = "ls"
+tabs = [
   { name = "eu-north-02-mgmt", command = "tls eu-north-02a mgmt" },
   { name = "eu-north-02-fleet", command = "tls eu-north-02a fleet" },
-  { name = "us-east-01a-mgmt", command = "tl us-east-01a mgmt" },
   { name = "bmaas", command = "hocheck -m -r eu-north-02" },
+  { name = "opencode", command = "opencode" },
+]
+
+[[workspace]]
+name = "EU-SOUTH-03B"
+cwd = "~/nodes"
+command = "ls"
+tabs = [
+  { name = "eu-south-03-mgmt", command = "tls eu-south-03b mgmt" },
+  { name = "eu-south-03-fleet", command = "tls eu-south-03b fleet" },
+  { name = "bmaas", command = "hocheck -m -r eu-south-03b" },
   { name = "opencode", command = "opencode" },
 ]
 
