@@ -1,12 +1,16 @@
--- install lazy.nvim plugin manager
+-- Install lazy.nvim. Check for its entrypoint rather than only the directory:
+-- an interrupted clone can leave a directory that is not a usable checkout.
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-if not (vim.uv or vim.loop).fs_stat(lazypath) then
+local lazy_entrypoint = lazypath .. "/lua/lazy/init.lua"
+if vim.fn.filereadable(lazy_entrypoint) == 0 then
+	vim.fn.delete(lazypath, "rf")
+
 	local lazyrepo = "https://github.com/folke/lazy.nvim.git"
 	local out = vim.fn.system({ "git", "clone", "--filter=blob:none", "--branch=stable", lazyrepo, lazypath })
 	if vim.v.shell_error ~= 0 then
 		error("Error cloning lazy.nvim:\n" .. out)
 	end
-end ---@diagnostic disable-next-line: undefined-field
+end
 vim.opt.rtp:prepend(lazypath)
 
 local plugins = {

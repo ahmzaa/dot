@@ -6,26 +6,6 @@ export PATH=$HOME/bin:$PATH
 export PATH=$HOME/.local/bin:$PATH
 export PATH=$PATH:/usr/local/go/bin
 export PATH=$PATH:$HOME/go/bin
+export PATH=$PATH:$HOME/.local/share/pi-node/current/bin
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
-
-export PATH=/Users/hahmed/coreweave/fleet-ops-sandbox/team/acannizzaro/scripts/L11-RMA-ify/:$PATH
-
-# OrbStack CLI tools and zsh completions (_orb, _orbctl, _docker). Previously
-# lived in $ZDOTDIR/.zprofile, which was gitignored and so never shipped by this
-# repo. It belongs here rather than in hosts/mac because .zshrc sources this
-# file before compinit, whereas hosts/* run after it via os-specific.sh — an
-# fpath+= there would be a no-op. Guarded, as OrbStack is macOS-only.
-if [ -d "$HOME/.orbstack" ]; then
-    export PATH="$PATH:$HOME/.orbstack/bin"
-    fpath+="$HOME/.orbstack/shell/completions/zsh"
-fi
-
-# opencode's official installer (used by `install`) drops its binary here. Guarded
-# because the directory is absent on hosts where opencode comes from a package
-# manager instead (nix on shadow, which serves it from /run/current-system/sw/bin).
-# An `if` rather than `[ ... ] && ...` so sourcing this file still exits 0 on the
-# hosts where the guard is false — it is the last statement in the file.
-if [ -d "$HOME/.opencode/bin" ]; then
-    export PATH="$HOME/.opencode/bin:$PATH"
-fi

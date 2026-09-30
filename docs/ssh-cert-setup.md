@@ -7,8 +7,9 @@ these dotfiles.
 
 - `zsh/.config/zsh/ssh-agent` starts or reconnects to an SSH agent before
   renewal runs.
-- `zsh/.config/zsh/ssh-cert` checks every `~/.ssh/*-cert.pub` at shell startup
-  and renews certificates below the configured threshold.
+- `zsh/.config/zsh/ssh-cert` can issue the first certificate for a new device,
+  then checks every `~/.ssh/*-cert.pub` at shell startup and renews certificates
+  below the configured threshold.
 - `ssh/.ssh/config` enables `AddKeysToAgent`, sets the bootstrap identity, and
   includes the gitignored `~/.ssh/config.local`.
 - `ca/sign-key` lives on the CA host and signs the supplied public key with the
@@ -89,7 +90,25 @@ last hour before expiry).
    `SSH_CERT_AUTORENEW=0` keeps the expiry check at startup but skips renewal.
    Unset it, or run `SSH_CERT_AUTORENEW=1 ssh-cert`, when ready to renew.
 
-4. Optionally create `~/.ssh/config.local` for a CA alias or connection
+4. On a new device that has a bootstrap key but no certificate yet, issue its
+   first certificate interactively:
+
+   ```sh
+   ssh-cert --create
+   ```
+
+   This signs `~/.ssh/id_ed25519.pub` by default. Pass another public key in
+   `~/.ssh` when needed:
+
+   ```sh
+   ssh-cert --create ~/.ssh/id_ed25519_sk.pub
+   ```
+
+   The bootstrap key must already be authorized on the CA and loaded in the
+   agent so the script can authenticate with `BatchMode=yes`. The resulting
+   certificate is written beside the public key as `<name>-cert.pub`.
+
+5. Optionally create `~/.ssh/config.local` for a CA alias or connection
    multiplexing:
 
    ```sh

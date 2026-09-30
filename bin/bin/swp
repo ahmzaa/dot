@@ -1,66 +1,106 @@
 #!/usr/bin/env bash
 
-CACHE_DIR="$XDG_CACHE_HOME/wallpp_cache"
-if [ ! -z "$CACHE_DIR" ]; then
-  mkdir -p $CACHE_DIR
+CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/wallpp_cache"
+mkdir -p -- "$CACHE_DIR" || exit 1
+
+IMG_PATH=${1:-}
+TARGET_MONITOR=${2:-}
+
+if ! command -v jq >/dev/null 2>&1; then
+  echo "Warning: swp requires jq to detect monitors. Please install jq and try again." >&2
+  exit 1
 fi
 
-IMG_PATH=$1
-TARGET_MONITOR=$2
-
 get_all_monitors() {
-  hyprctl monitors -j | jq -r '.[] | .name'
+  hyprctl monitors -j | jq -r '.[].name'
 }
 
 apply_wall() {
-  awww img "$WALLPP" \
-    --outputs "$mon" \
+  local wallpaper=$1
+  local monitor=$2
+
+  awww img "$wallpaper" \
+    --outputs "$monitor" \
     --resize fit \
     --transition-type wave
 }
 
-
-# Restore Mode: loop through all active monitors and restore their specific wallpapers
-if [ -z "$IMG_PATH" ]; then
-  echo "Restoring wallpapers from cache"
-  get_all_monitors | while read -r mon; do
-    if [ -f "$CACHE_DIR/$mon" ]; then
-      WALLPP=$(cat "$CACHE_DIR/$mon")
-      apply_wall
-    fi
-  done
-  exit 0
+mapfile -t ACTIVE_MONITORS < <(get_all_monitors)
+if ((${#ACTIVE_MONITORS[@]} == 0)); then
+  echo "Error: No active Hyprland monitors found." >&2
+  exit 1
 fi
 
-# New Image Mode
-WALLPP=$(realpath "$IMG_PATH")
-[ ! -f "$WALLPP" ] && echo "Error: File $WALLPP does not exist" && exit 1
+# Restore mode: restore each active monitor's cached wallpaper.
+if [[ -z $IMG_PATH ]]; then
+  echo "Restoring wallpapers from cache"
+  status=0
 
-# monitor selection
-if [ "$TARGET_MONITOR" == "--select" ]; then
-  # manual selection with fzf
-  TARGET_MONITOR=$(get_all_monitors | fzf --prompt="Select Monitor: " --reverse --border)
-  [ -z "$TARGET_MONITOR" ] && echo "Selection cancelled." && exit 0
+  for mon in "${ACTIVE_MONITORS[@]}"; do
+    cache_file="$CACHE_DIR/$mon"
+    [[ -f $cache_file ]] || continue
+
+    IFS= read -r WALLPP < "$cache_file"
+    if [[ ! -f $WALLPP ]]; then
+      echo "Warning: Cached wallpaper for $mon no longer exists: $WALLPP" >&2
+      status=1
+      continue
+    fi
+
+    echo "Setting wallpaper for $mon"
+    apply_wall "$WALLPP" "$mon" || status=1
+  done
+
+  exit "$status"
+fi
+
+# New image mode.
+if ! WALLPP=$(realpath -e -- "$IMG_PATH") || [[ ! -f $WALLPP ]]; then
+  echo "Error: File '$IMG_PATH' does not exist." >&2
+  exit 1
+fi
+
+# Monitor selection.
+if [[ $TARGET_MONITOR == "--select" ]]; then
+  TARGET_MONITOR=$(printf '%s\n' "${ACTIVE_MONITORS[@]}" | fzf --prompt="Select Monitor: " --reverse --border)
+  [[ -n $TARGET_MONITOR ]] || { echo "Selection cancelled."; exit 0; }
   SELECTED_MONITORS=("$TARGET_MONITOR")
-elif [ -n "$TARGET_MONITOR" ]; then
-  # specific monitor provided as $2
-  if ! get_all_monitors | grep -q "^$TARGET_MONITOR$"; then
-    echo "Error: Monitor '$TARGET_MONITOR' not found."
+elif [[ -n $TARGET_MONITOR ]]; then
+  monitor_found=false
+  for mon in "${ACTIVE_MONITORS[@]}"; do
+    if [[ $mon == "$TARGET_MONITOR" ]]; then
+      monitor_found=true
+      break
+    fi
+  done
+
+  if [[ $monitor_found != true ]]; then
+    echo "Error: Monitor '$TARGET_MONITOR' not found." >&2
     exit 1
   fi
   SELECTED_MONITORS=("$TARGET_MONITOR")
 else
-  # No monitor specified: Get all active monitors
-  mapfile -t SELECTED_MONITORS < <(get_all_monitors)
+  SELECTED_MONITORS=("${ACTIVE_MONITORS[@]}")
 fi
 
-# Apply to all selected monitors
+# Apply to all selected monitors, caching only successful changes.
+status=0
 for mon in "${SELECTED_MONITORS[@]}"; do
   echo "Setting wallpaper for $mon"
-  echo "$WALLPP" > "$CACHE_DIR/$mon"
-  apply_wall
+  if apply_wall "$WALLPP" "$mon"; then
+    printf '%s\n' "$WALLPP" > "$CACHE_DIR/$mon"
+  else
+    echo "Error: Failed to set wallpaper for $mon." >&2
+    status=1
+  fi
 done
 
-# Generate Pywal16 Colors
-wal -i "$WALLPP" -n
+((status == 0)) || exit "$status"
+
+# Generate Pywal16 colors.
+if ! wal -i "$WALLPP" -n; then
+  echo "Warning: Wallpaper changed, but wal failed to generate colors." >&2
+  exit 1
+fi
+
 echo "Wallpaper updated for: ${SELECTED_MONITORS[*]}"
