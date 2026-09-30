@@ -29,8 +29,16 @@
 [[workspace]]
 name = "dotfiles"
 cwd = "~/dot"
-command = "nvim -c ':Telescope find_files'"
+command = "ls"
 tab = "edit"
+
+[[workspace]]
+name = "projects"
+cwd = "~/prj"
+command = "ls"
+tabs = [
+  { name = "Pi", command = "pi" },
+]
 
 [[workspace]]
 name = "nodes"
@@ -59,13 +67,5 @@ tabs = [
   { name = "eu-south-03-mgmt", command = "tls eu-south-03b mgmt" },
   { name = "eu-south-03-fleet", command = "tls eu-south-03b fleet" },
   { name = "bmaas", command = "hocheck -m -r eu-south-03b" },
-  { name = "opencode", command = "opencode" },
-]
-
-[[workspace]]
-name = "projects"
-cwd = "~/prj"
-command = "ls"
-tabs = [
   { name = "opencode", command = "opencode" },
 ]
