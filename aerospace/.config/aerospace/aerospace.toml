@@ -1,3 +1,4 @@
+
 config-version = 2
 
 # Start AeroSpace at login
@@ -94,10 +95,10 @@ chrome = '1'
 if.app-id = 'com.tinyspeck.slackmacgap'
 run = 'move-node-to-workspace 7-slack'
 
-#[[on-window-detected]]
-#if.app-id = 'com.tinyspeck.slackmacgap'
-#if.window-title-regex-substring = "*Huddle*"
-#run = 'move-node-to-workspace 8-huddle'
+[[on-window-detected]]
+if.app-id = 'com.tinyspeck.slackmacgap'
+if.window-title-regex-substring = "Huddle"
+run = 'move-node-to-workspace 8-huddle'
 
 [[on-window-detected]]
 if.app-id = 'com.google.Chrome'
