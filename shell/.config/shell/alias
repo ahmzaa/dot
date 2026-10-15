@@ -62,3 +62,21 @@ function y() {
 
 alias kubectl="kubecolor"
 alias k="kubecolor"
+
+alias count="bmns -l 'ds.coreweave.com/sku.product=GPU-GB200,flcc.coreweave.com/state=fail' -o count"
+
+bmn_failstate() {
+  if [ -z "$1" ]; then
+    echo "usage: bmn_failstate <previous-state>" >&2
+    return 1
+  fi
+  bmns -l "ds.coreweave.com/sku.product=GPU-GB200,flcc.coreweave.com/state=fail,flcc.coreweave.com/previous-state=$1"
+}
+
+rnodes() {
+  if [ -z "$1" ]; then
+    echo "usage: rnodes <rack>" >&2
+    return 1
+  fi
+  bmns -l "ds.coreweave.com/physical-topology.rack-name=$1"
+}
