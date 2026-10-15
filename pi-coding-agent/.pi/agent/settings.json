@@ -1,13 +1,19 @@
 {
   "packages": [
-    "npm:gentle-engram@0.1.8",
+    "npm:gentle-engram",
     "npm:pi-mcp-adapter",
     "npm:pi-subagents",
-    "npm:pi-web-search"
+    "npm:pi-web-search",
+    "git:github.com/coreweave/integrations-and-ai-skills",
+    "npm:@plannotator/pi-extension",
+    "npm:pi-lens"
   ],
-  "lastChangelogVersion": "0.84.2",
+  "lastChangelogVersion": "1.2.0",
   "theme": "dark",
-  "defaultProvider": "openai-codex",
-  "defaultModel": "gpt-5.6-sol",
-  "defaultThinkingLevel": "medium"
+  "defaultProvider": "anthropic",
+  "defaultModel": "claude-sonnet-5",
+  "defaultThinkingLevel": "medium",
+  "extensions": [
+    "-builtin:mcp"
+  ]
 }
