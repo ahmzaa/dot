@@ -9,6 +9,21 @@
 /missions/
 /trust.json
 
+# pi-mcp-adapter's own generated state: onboarding flags/fingerprint are pure
+# per-machine run state, and mcp-adapter.json embeds a machine-specific
+# absolute vault path (same reasoning as work/.config/work/secrets and
+# opencode/.config/opencode/plugins/engram.ts). Recreated by the adapter on
+# first run; not shipped by this repo.
+/mcp-adapter.json
+/mcp-onboarding.json
+
+# Installed and version-stamped by herdr (HERDR_INTEGRATION_VERSION header),
+# same reasoning as opencode/.config/opencode/plugins/herdr-agent-state.js.
+/extensions/herdr-agent-state.ts
+
+# Per-machine version-tracking state written by pi-subagents at runtime.
+/pi-subagents/last-seen-version.json
+
 # Package checkouts are reconstructed from settings.json on startup.
 /npm/
 /git/

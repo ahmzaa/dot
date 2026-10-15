@@ -1,5 +1,8 @@
 nvim/.config/nvim/lazy-lock.json
 
+# macOS Finder cruft, can appear anywhere in the tree.
+.DS_Store
+
 # zsh runtime state. Normally written to $ZDOTDIR (~/.config/zsh), which is an
 # unfolded real directory, so it never lands here. Kept as a guard for the case
 # where stow re-folds ~/.config/zsh into a symlink to this package — zsh would
@@ -46,6 +49,13 @@ work/.config/opencode/agents/node-triage.md
 # versioned; plugins.json is a generated registry holding absolute paths.
 herdr/.config/herdr/*.log
 herdr/.config/herdr/*.sock
+herdr/.config/herdr/*.sock.agent
 herdr/.config/herdr/session.json
+herdr/.config/herdr/session-snapshots/
+herdr/.config/herdr/release-notes.json
 herdr/.config/herdr/.plugins.lock
 herdr/.config/herdr/plugins.json
+
+# pi-coding-agent package: stray empty stub seen under XDG_CONFIG_HOME/mcp
+# (distinct from the real config under .pi/agent/), not meant to be tracked.
+pi-coding-agent/.config/mcp/mcp.json
