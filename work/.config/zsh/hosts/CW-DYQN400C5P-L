@@ -16,6 +16,15 @@
 # once each on every shell.
 source $HOME/.cw-fleet-tools/current/setup/source
 
+# cwft's setup/source PATH-rebuild glob excludes */helpers and */setup but NOT
+# */.tests, so every fixture/mock dir under scripts/.tests/** (e.g.
+# scripts/.tests/vmq-resolve/spec/mock/curl, a fake curl) ends up on PATH
+# ahead of /usr/bin and shadows the real binaries. Strip those back out here
+# rather than patching the vendored tool. Upstream fix: add */.tests|*/.tests/*
+# to the case-exclusion in ~/.cw-fleet-tools/current/setup/source.
+typeset -U path PATH
+path=( ${path:#*/.tests/*} )
+
 export PATH=$PATH:$HOME/coreweave/cw-fleet-tools/team/jfields
 
 # Internal endpoints / secrets (gitignored). Must be sourced BEFORE opencode
