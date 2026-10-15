@@ -35,6 +35,17 @@
     "plan": {
       "model": "anthropic/claude-opus-5",
       "variant": "xhigh"
+    },
+    // Re-enables the obsidian_* tools that the top-level "tools" key turns
+    // off everywhere else. The rest of this agent (prompt, mode, model,
+    // permissions) lives in agents/obsidian.md — but `tools` MUST be here,
+    // not in that file's frontmatter: `tools` is not an allowed frontmatter
+    // field, so opencode would silently route it into `options` and the
+    // gating would do nothing.
+    "obsidian": {
+      "tools": {
+        "obsidian_*": true
+      }
     }
   },
   "mcp": {
@@ -56,7 +67,42 @@
         "-H", "https://tea.ahmza.com",
         "-T", "{env:GITEA_TOKEN}"
       ]
+    },
+    // Operates on the vault's markdown directly — Obsidian does not need to
+    // be running, and no Local REST API plugin is involved.
+    //
+    // The vault is NOT a git repo and nextcloud-sync writes to it every 15m,
+    // so this server's journal/trash is the only undo that exists. Recovery
+    // data lives in <vault>/.obsidian-mcp, which is excluded from Nextcloud
+    // sync via the plugin's excludedFolders. Capped well under the 1 GiB /
+    // 30-day default so an un-exclusion can't quietly balloon the sync.
+    //
+    // Vault id is "my-mind-2-0", not "my-mind-2.0": ids allow only
+    // [a-z0-9_-] and must start with a letter, so the dot is rejected.
+    "obsidian": {
+      "enabled": true,
+      "type": "local",
+      "command": [
+        "obsidian-mcp", "serve",
+        "--vault", "my-mind-2-0=/Users/hahmed/Documents/my-mind-2.0",
+        "--recovery-days", "14",
+        "--recovery-max-bytes", "268435456"
+      ]
     }
+  },
+  // Keeps all 13 obsidian_* tool definitions out of context for every agent
+  // that doesn't need them, which is nearly all of them. Only agents.obsidian
+  // turns them back on. Same cache-write logic as the compaction block above:
+  // an idle MCP server is pure recurring cost.
+  //
+  // This uses the deprecated `tools` key rather than `permission` on purpose.
+  // `permission: "deny"` blocks a tool's *execution* but still advertises its
+  // definition to the model, so it would save nothing. `tools: false` is what
+  // opencode's own MCP docs use for exactly this, and it omits the definition.
+  // If `tools` is ever removed, the replacement must be verified to drop the
+  // definition — not merely to deny the call.
+  "tools": {
+    "obsidian_*": false
   },
   "plugin": [
     "@honcho-ai/opencode-honcho"
